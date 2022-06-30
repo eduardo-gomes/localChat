@@ -20,6 +20,8 @@ import {
 	View,
 } from 'react-native';
 
+import { Contact, ContactInfo } from './lib';
+
 const Colors = {
 	primary: '#1292B4',
 	white: '#FFF',
@@ -37,13 +39,16 @@ const SuggestAddContact = (
 	</View>
 );
 
-interface Contact{
-	name: string
-};
+const sampleContacts: Array<Contact> = [
+	new Contact("Contato 1"),
+	new Contact("Contato 2"),
+	new Contact("Contato 3"),
+	new Contact("Contato 4")
+];
 
 const Section: React.FC<{
 	// children: React.ReactNode;
-	contact: Contact;
+	contact: ContactInfo;
 }> = ({ /*children,*/ contact }) => {
 	const isDarkMode = useColorScheme() === 'dark';
 	return (
@@ -95,7 +100,10 @@ const App = () => {
 					style={{
 						backgroundColor: isDarkMode ? Colors.black : Colors.white,
 					}}>
-					<Section contact={{name: "Step One"}}/>             
+					{sampleContacts.map((contact) => {
+						const info = contact.getInfo();
+						return (<Section contact={info} key={info.uid} />); //TODO: use uid
+					})}
 				</View>
 			</ScrollView>
 		</SafeAreaView>
