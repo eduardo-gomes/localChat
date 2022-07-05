@@ -12,11 +12,16 @@ const Colors = {
 	dark: '#444',
 	darker: '#222',
 	black: '#000',
+	darkCyan: '#088',
 };
 
 function getStyles(scheme?: string | null) {
 	const isDarkMode = scheme === 'dark';
 	return StyleSheet.create({
+		navigatorHeader: {
+			backgroundColor: Colors.darkCyan,
+			color: Colors.lighter,
+		},
 		contactInfoList: {
 			marginTop: 5,
 			paddingHorizontal: 24,
@@ -37,7 +42,7 @@ function getStyles(scheme?: string | null) {
 			fontWeight: '700',
 		},
 		title: {
-			backgroundColor: '#088',
+			backgroundColor: Colors.darkCyan,
 			padding: 10,
 		},
 		titleText: {

@@ -64,17 +64,10 @@ const ContactList = () => {
 
 	const backgroundStyle = styles.background;
 
-	const Título = (
-		<View style={styles.title} >
-			<Text style={styles.titleText}> Conversas </Text>
-		</View>
-	);
-
 	const hasContacts = false;
 
 	return (
 		<SafeAreaView style={backgroundStyle}>
-			{Título}
 			{hasContacts ? SuggestAddContact : null}
 			<StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
 			<ScrollView
