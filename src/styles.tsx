@@ -13,15 +13,33 @@ const Colors = {
 	darker: '#222',
 	black: '#000',
 	darkCyan: '#088',
+	darkerCyan: '#066',
+	lightCyan: '#0EE'
 };
+
+function getNavigatorTheme(scheme?: string | null){
+	const isDarkMode = scheme === 'dark';
+
+	const refStyle = getStyles(scheme);
+
+	const topBar = isDarkMode ? Colors.darkCyan : Colors.lightCyan;
+
+	return {
+		dark: isDarkMode,
+		colors: {
+			background: refStyle.background.backgroundColor,
+			primary: topBar,
+			text: isDarkMode ? Colors.lighter : Colors.darker,
+			card: topBar,
+			border: Colors.darkerCyan,
+			notification: isDarkMode ? Colors.darker : Colors.lighter,
+		}
+	}
+}
 
 function getStyles(scheme?: string | null) {
 	const isDarkMode = scheme === 'dark';
 	return StyleSheet.create({
-		navigatorHeader: {
-			backgroundColor: Colors.darkCyan,
-			color: Colors.lighter,
-		},
 		contactInfoList: {
 			marginTop: 5,
 			paddingHorizontal: 24,
@@ -57,4 +75,4 @@ function getStyles(scheme?: string | null) {
 
 const styles = getStyles(Appearance.getColorScheme());
 
-export { styles, getStyles, Colors };
+export { styles, getStyles, Colors, getNavigatorTheme };

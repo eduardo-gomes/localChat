@@ -15,7 +15,7 @@ const App = () => {
 				<Stack.Screen
 					name="Home"
 					component={ContactList}
-					options={{ title: "Lista de contatos", headerStyle: styles.navigatorHeader, headerTintColor: styles.navigatorHeader.color }}
+					options={{ title: "Lista de contatos" }}
 				/>
 			</Stack.Navigator>
 		</NavigationContainer>
