@@ -1,4 +1,4 @@
-package com.localchat;
+package dev.emg.localchat;
 
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;

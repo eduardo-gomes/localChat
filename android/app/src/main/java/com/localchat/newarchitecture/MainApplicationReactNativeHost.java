@@ -1,4 +1,4 @@
-package com.localchat.newarchitecture;
+package dev.emg.localchat.newarchitecture;
 
 import android.app.Application;
 import androidx.annotation.NonNull;
@@ -19,9 +19,9 @@ import com.facebook.react.fabric.CoreComponentsRegistry;
 import com.facebook.react.fabric.FabricJSIModuleProvider;
 import com.facebook.react.fabric.ReactNativeConfig;
 import com.facebook.react.uimanager.ViewManagerRegistry;
-import com.localchat.BuildConfig;
-import com.localchat.newarchitecture.components.MainComponentsRegistry;
-import com.localchat.newarchitecture.modules.MainApplicationTurboModuleManagerDelegate;
+import dev.emg.localchat.BuildConfig;
+import dev.emg.localchat.newarchitecture.components.MainComponentsRegistry;
+import dev.emg.localchat.newarchitecture.modules.MainApplicationTurboModuleManagerDelegate;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="com.localchat">
+  package="dev.emg.localchat">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
