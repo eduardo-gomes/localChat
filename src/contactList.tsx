@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React from 'react';
+import React, { useContext } from 'react';
 import {
 	Button,
 	SafeAreaView,
@@ -10,6 +10,7 @@ import {
 	View,
 } from 'react-native';
 import { RootStackParamList } from './App';
+import AppContext from './context';
 
 import { Contact, ContactInfo } from './lib';
 import { Colors, getStyles, styles } from './styles';
@@ -20,13 +21,6 @@ const SuggestAddContact = (
 		{/* <Button></Button>r */}
 	</View>
 );
-
-const sampleContacts: Array<Contact> = [
-	// new Contact("Contato 1"),
-	// new Contact("Contato 2"),
-	// new Contact("Contato 3"),
-	// new Contact("Contato 4")
-];
 
 const Section: React.FC<{
 	// children: React.ReactNode;
@@ -71,11 +65,11 @@ function EmptyListPrompt({ navigation, route }: Props) {
 	)
 };
 
-function ContactListMap({ list }: { list: Contact[] }) {
+function ContactListMap({ list }: { list: ContactInfo[] }) {
 	return (
 		<>
 			{list.map((contact) => {
-				const info = contact.getInfo();
+				const info = contact;
 				return (<Section contact={info} key={info.uid} />); //TODO: use uid
 			})}
 		</>);
@@ -85,9 +79,13 @@ function ContactList({ navigation, route }: Props) {
 	const isDarkMode = useColorScheme() === 'dark';
 	const styles = getStyles(useColorScheme());
 
+	const context = useContext(AppContext);
+
+	const contactList = context?.contactInfo ?? [];
+
 	const backgroundStyle = styles.background;
 
-	const hasContacts = false;
+	const hasContacts = contactList.length <= 0;
 
 	return (
 		<SafeAreaView style={backgroundStyle}>
@@ -102,10 +100,10 @@ function ContactList({ navigation, route }: Props) {
 							backgroundColor: isDarkMode ? Colors.black : Colors.white,
 						}
 					}>
-					<ContactListMap list={sampleContacts} />
+					<ContactListMap list={contactList} />
 				</View>
 			</ScrollView>
-			<EmptyListPrompt navigation={navigation} route={route} />
+			{hasContacts ? <EmptyListPrompt navigation={navigation} route={route} /> : null}
 		</SafeAreaView >
 	);
 };
