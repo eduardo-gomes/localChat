@@ -17,6 +17,7 @@ import {
 	StyleSheet,
 	Text,
 	useColorScheme,
+	Appearance,
 	View,
 } from 'react-native';
 
@@ -52,7 +53,7 @@ const Section: React.FC<{
 }> = ({ /*children,*/ contact }) => {
 	const isDarkMode = useColorScheme() === 'dark';
 	return (
-		<View style={styles.sectionContainer}>
+		<View style={styles.contactInfoList}>
 			<Text
 				style={[
 					styles.sectionTitle,
@@ -77,10 +78,9 @@ const Section: React.FC<{
 
 const App = () => {
 	const isDarkMode = useColorScheme() === 'dark';
+	const styles = getStyles(useColorScheme());
 
-	const backgroundStyle = {
-		backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-	};
+	const backgroundStyle = styles.background;
 
 	const Título = (
 		<View style={styles.title}>
@@ -110,30 +110,43 @@ const App = () => {
 	);
 };
 
-const styles = StyleSheet.create({
-	sectionContainer: {
-		marginTop: 32,
-		paddingHorizontal: 24,
-	},
-	sectionTitle: {
-		fontSize: 24,
-		fontWeight: '600',
-	},
-	sectionDescription: {
-		marginTop: 8,
-		fontSize: 18,
-		fontWeight: '400',
-	},
-	highlight: {
-		fontWeight: '700',
-	},
-	title: {
-		backgroundColor: '#088',
-	},
-	titleText: {
-		fontSize: 36,
-		fontWeight: '700',
-	},
-});
+
+function getStyles(scheme?: string | null) {
+	const isDarkMode = scheme === 'dark';
+	return StyleSheet.create({
+		contactInfoList: {
+			marginTop: 5,
+			paddingHorizontal: 24,
+			borderStyle: "solid",
+			borderColor: "gray",
+			borderBottomWidth: 1
+		},
+		sectionTitle: {
+			fontSize: 24,
+			fontWeight: '600',
+		},
+		sectionDescription: {
+			marginTop: 8,
+			fontSize: 18,
+			fontWeight: '400',
+		},
+		highlight: {
+			fontWeight: '700',
+		},
+		title: {
+			backgroundColor: '#088',
+			padding: 10,
+		},
+		titleText: {
+			fontSize: 36,
+			fontWeight: '700',
+		},
+		background: {
+			backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+		}
+	});
+}
+
+const styles = getStyles(Appearance.getColorScheme());
 
 export default App;
