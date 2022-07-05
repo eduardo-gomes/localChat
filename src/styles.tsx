@@ -17,7 +17,7 @@ const Colors = {
 	lightCyan: '#0EE'
 };
 
-function getNavigatorTheme(scheme?: string | null){
+function getNavigatorTheme(scheme?: string | null) {
 	const isDarkMode = scheme === 'dark';
 
 	const refStyle = getStyles(scheme);
@@ -69,6 +69,16 @@ function getStyles(scheme?: string | null) {
 		},
 		background: {
 			backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+		},
+		emptyListPrompt: {
+			height: '100%',
+			display: 'flex',
+			justifyContent: 'center',
+			alignItems: 'center',
+		},
+		emptyListPromptText: {
+			fontSize: 18,
+			textAlign: 'center',
 		}
 	});
 }

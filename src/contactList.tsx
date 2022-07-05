@@ -15,12 +15,6 @@ import AppContext from './context';
 import { Contact, ContactInfo } from './lib';
 import { Colors, getStyles, styles } from './styles';
 
-const SuggestAddContact = (
-	<View>
-		<Text>Você não possui nenhum contato.</Text>
-		{/* <Button></Button>r */}
-	</View>
-);
 
 const Section: React.FC<{
 	// children: React.ReactNode;
@@ -58,9 +52,11 @@ type Props = NativeStackScreenProps<RootStackParamList, "Home">;
 
 function EmptyListPrompt({ navigation, route }: Props) {
 	return (
-		<View>
-			<Text>Parece que você não possui nenhum contato. Você pode adicionar um pressionando o botão abaixo</Text>
-			<Button onPress={() => { navigation.navigate("AddContact") }} title="press me" />
+		<View style={styles.emptyListPrompt}>
+			<Text style={styles.emptyListPromptText}>Parece que você não possui nenhum contato.
+				{"\n"}
+				Você pode adicionar um pressionando o botão abaixo</Text>
+			<Button onPress={() => { navigation.navigate("AddContact") }} title="Adicionar contatos" />
 		</View>
 	)
 };
@@ -89,7 +85,6 @@ function ContactList({ navigation, route }: Props) {
 
 	return (
 		<SafeAreaView style={backgroundStyle}>
-			{hasContacts ? SuggestAddContact : null}
 			<StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
 			<ScrollView
 				contentInsetAdjustmentBehavior="automatic"
