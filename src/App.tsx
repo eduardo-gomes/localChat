@@ -2,6 +2,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 import { Appearance } from 'react-native';
+import AddContact from './addContact';
 
 import ContactList from './contactList';
 import { getNavigatorTheme } from './styles';
@@ -26,7 +27,7 @@ const App = () => {
 				/>
 				<Stack.Screen
 					name="AddContact"
-					component={ContactList}
+					component={AddContact}
 				/>
 			</Stack.Navigator>
 		</NavigationContainer>
