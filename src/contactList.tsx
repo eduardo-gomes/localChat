@@ -84,7 +84,7 @@ function ContactList({ navigation, route }: Props) {
 
 	const hasContacts = contactList.length <= 0;
 
-	return (
+	return (<>
 		<SafeAreaView style={backgroundStyle}>
 			<StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
 			<ScrollView
@@ -99,16 +99,16 @@ function ContactList({ navigation, route }: Props) {
 					<ContactListMap list={contactList} />
 				</View>
 			</ScrollView>
-			{hasContacts ?
-				<EmptyListPrompt navigation={navigation} route={route} /> :
-				<View style={{
-					position: 'absolute',
-					bottom: 10,
-					right: 10
-				}}>
-					<PlusButton size={50} background={styles.mainColor.color} color={styles.secondaryColor.color} onPress={() => { navigation.navigate("AddContact"); }} />
-				</View>}
+			{hasContacts ? <EmptyListPrompt navigation={navigation} route={route} /> : null}
 		</SafeAreaView >
+		<View style={{
+			position: 'absolute',
+			bottom: 10,
+			right: 10
+		}}>
+			<PlusButton size={50} background={styles.mainColor.color} color={styles.secondaryColor.color} onPress={() => { navigation.navigate("AddContact"); }} />
+		</View>
+	</>
 	);
 };
 
