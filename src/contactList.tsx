@@ -1,3 +1,4 @@
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React from 'react';
 import {
 	Button,
@@ -8,6 +9,7 @@ import {
 	useColorScheme,
 	View,
 } from 'react-native';
+import { RootStackParamList } from './App';
 
 import { Contact, ContactInfo } from './lib';
 import { Colors, getStyles, styles } from './styles';
@@ -58,7 +60,9 @@ const Section: React.FC<{
 	);
 };
 
-const ContactList = () => {
+type Props = NativeStackScreenProps<RootStackParamList, "Home">;
+
+function ContactList({ navigation }: Props) {
 	const isDarkMode = useColorScheme() === 'dark';
 	const styles = getStyles(useColorScheme());
 
@@ -86,7 +90,8 @@ const ContactList = () => {
 						})}
 				</View>
 			</ScrollView>
-		</SafeAreaView>
+			<Button onPress={() => { navigation.navigate("AddContact") }} title="press me" />
+		</SafeAreaView >
 	);
 };
 
