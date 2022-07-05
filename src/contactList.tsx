@@ -22,10 +22,10 @@ const SuggestAddContact = (
 );
 
 const sampleContacts: Array<Contact> = [
-	new Contact("Contato 1"),
-	new Contact("Contato 2"),
-	new Contact("Contato 3"),
-	new Contact("Contato 4")
+	// new Contact("Contato 1"),
+	// new Contact("Contato 2"),
+	// new Contact("Contato 3"),
+	// new Contact("Contato 4")
 ];
 
 const Section: React.FC<{
@@ -62,7 +62,26 @@ const Section: React.FC<{
 
 type Props = NativeStackScreenProps<RootStackParamList, "Home">;
 
-function ContactList({ navigation }: Props) {
+function EmptyListPrompt({ navigation, route }: Props) {
+	return (
+		<View>
+			<Text>Parece que você não possui nenhum contato. Você pode adicionar um pressionando o botão abaixo</Text>
+			<Button onPress={() => { navigation.navigate("AddContact") }} title="press me" />
+		</View>
+	)
+};
+
+function ContactListMap({ list }: { list: Contact[] }) {
+	return (
+		<>
+			{list.map((contact) => {
+				const info = contact.getInfo();
+				return (<Section contact={info} key={info.uid} />); //TODO: use uid
+			})}
+		</>);
+}
+
+function ContactList({ navigation, route }: Props) {
 	const isDarkMode = useColorScheme() === 'dark';
 	const styles = getStyles(useColorScheme());
 
@@ -83,14 +102,10 @@ function ContactList({ navigation }: Props) {
 							backgroundColor: isDarkMode ? Colors.black : Colors.white,
 						}
 					}>
-					{
-						sampleContacts.map((contact) => {
-							const info = contact.getInfo();
-							return (<Section contact={info} key={info.uid} />); //TODO: use uid
-						})}
+					<ContactListMap list={sampleContacts} />
 				</View>
 			</ScrollView>
-			<Button onPress={() => { navigation.navigate("AddContact") }} title="press me" />
+			<EmptyListPrompt navigation={navigation} route={route} />
 		</SafeAreaView >
 	);
 };
