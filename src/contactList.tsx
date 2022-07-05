@@ -10,6 +10,7 @@ import {
 	View,
 } from 'react-native';
 import { RootStackParamList } from './App';
+import PlusButton from './botãoRedondo';
 import AppContext from './context';
 
 import { Contact, ContactInfo } from './lib';
@@ -98,7 +99,15 @@ function ContactList({ navigation, route }: Props) {
 					<ContactListMap list={contactList} />
 				</View>
 			</ScrollView>
-			{hasContacts ? <EmptyListPrompt navigation={navigation} route={route} /> : null}
+			{hasContacts ?
+				<EmptyListPrompt navigation={navigation} route={route} /> :
+				<View style={{
+					position: 'absolute',
+					bottom: 10,
+					right: 10
+				}}>
+					<PlusButton size={50} background={styles.mainColor.color} color={styles.secondaryColor.color} onPress={() => { navigation.navigate("AddContact"); }} />
+				</View>}
 		</SafeAreaView >
 	);
 };

@@ -22,7 +22,7 @@ function getNavigatorTheme(scheme?: string | null) {
 
 	const refStyle = getStyles(scheme);
 
-	const topBar = isDarkMode ? Colors.darkCyan : Colors.lightCyan;
+	const topBar = styles.mainColor.color;
 
 	return {
 		dark: isDarkMode,
@@ -78,7 +78,13 @@ function getStyles(scheme?: string | null) {
 		},
 		emptyListPromptText: {
 			fontSize: 18,
-			textAlign: 'center',
+			textAlign: 'center'
+		},
+		mainColor: {
+			color: isDarkMode ? Colors.darkCyan : Colors.lightCyan,
+		},
+		secondaryColor: {
+			color: isDarkMode ? Colors.lighter : Colors.darker,
 		}
 	});
 }
