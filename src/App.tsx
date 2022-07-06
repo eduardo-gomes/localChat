@@ -18,7 +18,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const App = () => {
 	const theme = getNavigatorTheme(Appearance.getColorScheme());
-	const [contactInfoState, setContactListState] = React.useState<ContactInfo[]>([{ name: 'Contato 1', uid: "123456789" }]);
+	const [contactInfoState, setContactListState] = React.useState<ContactInfo[]>([/*{ name: 'Contato 1', uid: "123456789" }*/]);
 
 	const contextHolder: ContextInfo = {
 		contactInfo: contactInfoState,

@@ -101,13 +101,13 @@ function ContactList({ navigation, route }: Props) {
 			</ScrollView>
 			{hasContacts ? <EmptyListPrompt navigation={navigation} route={route} /> : null}
 		</SafeAreaView >
-		<View style={{
+		{!hasContacts ? <View style={{
 			position: 'absolute',
 			bottom: 10,
 			right: 10
 		}}>
 			<PlusButton size={50} background={styles.mainColor.color} color={styles.secondaryColor.color} onPress={() => { navigation.navigate("AddContact"); }} />
-		</View>
+		</View>: null}
 	</>
 	);
 };
