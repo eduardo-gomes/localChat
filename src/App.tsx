@@ -1,13 +1,15 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
-import { Appearance } from 'react-native';
+import { Appearance, Button } from 'react-native';
 import AddContact from './addContact';
 
 import ContactList from './contactList';
-import AppContext, { ContextInfo } from './context';
 import { ContactInfo } from './lib';
 import { getNavigatorTheme } from './styles';
+import { getId } from './lib/id';
+
+import ContactManager, { getContacts, setCallback } from "./lib/contactManager";
 
 type RootStackParamList = {
 	Home: undefined;
@@ -16,17 +18,28 @@ type RootStackParamList = {
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-const App = () => {
-	const theme = getNavigatorTheme(Appearance.getColorScheme());
-	const [contactInfoState, setContactListState] = React.useState<ContactInfo[]>([/*{ name: 'Contato 1', uid: "123456789" }*/]);
-
-	const contextHolder: ContextInfo = {
-		contactInfo: contactInfoState,
-		setContactInfo: setContactListState,
+class App extends React.Component {
+	state: {
+		contactInfo: ContactInfo[],
 	};
 
-	return (
-		<AppContext.Provider value={contextHolder}>
+	constructor(props: {}) {
+		super(props);
+		this.state = {
+			contactInfo: [],
+		};
+
+		ContactManager.clear();//clear dummy contacts
+
+		this.state.contactInfo = getContacts();
+		setCallback((contactInfo) => this.setState({ contactInfo }));
+
+		getId().then(console.info);
+	}
+	render() {
+		const theme = getNavigatorTheme(Appearance.getColorScheme());
+
+		return (
 			<NavigationContainer theme={theme}>
 				<Stack.Navigator>
 					<Stack.Screen
@@ -40,8 +53,11 @@ const App = () => {
 					/>
 				</Stack.Navigator>
 			</NavigationContainer>
-		</AppContext.Provider>
-	);
+		);
+	}
+	componentWillUnmount() {
+		console.log("Will unmount app");
+	}
 };
 
 

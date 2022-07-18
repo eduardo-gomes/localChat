@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React, { useContext } from 'react';
+import React from 'react';
 import {
 	Button,
 	SafeAreaView,
@@ -11,9 +11,10 @@ import {
 } from 'react-native';
 import { RootStackParamList } from './App';
 import PlusButton from './botãoRedondo';
-import AppContext from './context';
 
-import { Contact, ContactInfo } from './lib';
+import { ContactInfo } from './lib';
+import ContactManager from './lib/contactManager';
+import { InfoButton } from './lib/infoScreen';
 import { Colors, getStyles, styles } from './styles';
 
 
@@ -76,9 +77,7 @@ function ContactList({ navigation, route }: Props) {
 	const isDarkMode = useColorScheme() === 'dark';
 	const styles = getStyles(useColorScheme());
 
-	const context = useContext(AppContext);
-
-	const contactList = context?.contactInfo ?? [];
+	const contactList = ContactManager.contactHook();
 
 	const backgroundStyle = styles.background;
 
@@ -107,7 +106,7 @@ function ContactList({ navigation, route }: Props) {
 			right: 10
 		}}>
 			<PlusButton size={50} background={styles.mainColor.color} color={styles.secondaryColor.color} onPress={() => { navigation.navigate("AddContact"); }} />
-		</View>: null}
+		</View> : null}
 	</>
 	);
 };

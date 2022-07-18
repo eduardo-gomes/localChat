@@ -1,22 +1,19 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Button, Text } from "react-native";
-import AppContext from './context';
+import ContactManager from './lib/contactManager';
+
 
 function AddContact() {
-	const context = useContext(AppContext);
 	function generateContact() {
 
-		const contactList = context?.contactInfo ?? [];
+		const contactList = ContactManager.getContacts();
 
 		const num = contactList.length + 1;
 
-		const newList = contactList.slice();
-		newList.push({
+		ContactManager.addContact({
 			name: `Contato ${num}`,
 			uid: String(num)
 		});
-
-		context?.setContactInfo(newList);
 	}
 
 	return (
