@@ -7,6 +7,7 @@ import AddContact from './addContact';
 import ContactList from './contactList';
 import { ContactInfo } from './lib';
 import { getNavigatorTheme } from './styles';
+import InfoScreen from './lib/infoScreen';
 import { getId } from './lib/id';
 
 import ContactManager, { getContacts, setCallback } from "./lib/contactManager";
@@ -14,6 +15,7 @@ import ContactManager, { getContacts, setCallback } from "./lib/contactManager";
 type RootStackParamList = {
 	Home: undefined;
 	AddContact: undefined;
+	NetInfo: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -45,12 +47,16 @@ class App extends React.Component {
 					<Stack.Screen
 						name="Home"
 						component={ContactList}
-						options={{ title: "Lista de contatos" }}
+						options={{ title: "Lista de contatos", headerRight: () => (__DEV__ ? <Button title="netInfo" /> : undefined) }}
 					/>
 					<Stack.Screen
 						name="AddContact"
 						component={AddContact}
 					/>
+					{__DEV__ ? <Stack.Screen
+						name="NetInfo"
+						component={InfoScreen}
+					/> : undefined}
 				</Stack.Navigator>
 			</NavigationContainer>
 		);

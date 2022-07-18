@@ -83,6 +83,8 @@ function ContactList({ navigation, route }: Props) {
 
 	const hasContacts = contactList.length <= 0;
 
+	React.useLayoutEffect(() => { if (__DEV__) navigation.setOptions({ headerRight: () => InfoButton(navigation) }); }, [navigation]);
+
 	return (<>
 		<SafeAreaView style={backgroundStyle}>
 			<StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
