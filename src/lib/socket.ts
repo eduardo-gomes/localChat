@@ -1,4 +1,5 @@
 import { Buffer } from "buffer";
+import { EventEmitter } from "events";
 import TcpSocket from "react-native-tcp-socket";
 import { getId } from "./id";
 import { BannerMessage, Message, MessageTypes } from "./netMessages";
@@ -16,6 +17,8 @@ class Connection {
 	buffer;
 	socket;
 	peerId: string | undefined;
+	emitter = new EventEmitter();
+	static Events = { MESSAGE: "message", INITIALIZED: "init" };
 	constructor(socket: TcpSocket.Socket) {
 		this.socket = socket;
 		this.buffer = "";
@@ -25,19 +28,22 @@ class Connection {
 				socket.write(bannerStr, "utf-8");
 			});
 		})
-		socket.on('data', (data) => {this.data(data);});
+		socket.on('data', (data) => { this.data(data); });
 		socket.on('error', function (error) {
 			console.log(error);
 		});
 		socket.on('close', function () {
-			console.log('Connection closed!');
+			console.log("[Connection]Connection closed with:", socket.remoteAddress, socket.remotePort);
 		});
 
+	}
+	getPeerId() {
+		return this.peerId;
 	}
 	data(data: Buffer | string) {
 		if (data instanceof Buffer)
 			data = data.toString("utf-8");
-		console.log("Data received:", data);
+		// console.log("[Connection]Data received:", data);
 		this.buffer = this.buffer.concat(data);
 		let n = this.buffer.indexOf('\n');
 
@@ -48,8 +54,8 @@ class Connection {
 			lines = lines.concat(split);
 			lines.forEach((line) => {
 				const msg = JSON.parse(line) as Message;//TODO: handle errors
-				console.log("Line:", msg);
-				console.log("message:", msg.type);
+				// console.log("[Connection]Line:", msg);
+				// console.log("[Connection]message:", msg.type);
 				this.onMessage(msg);
 			});
 		}
@@ -57,22 +63,36 @@ class Connection {
 	private onMessage(msg: Message) {
 		if (msg.type == MessageTypes.BANNER) {
 			this.peerId = (msg as BannerMessage).id;
+			this.emitter.emit(Connection.Events.INITIALIZED);
+			console.log("[Connection]peer banner id:", this.peerId);
 		}
-		if (this.callback) this.callback(msg);
+		this.emitter.emit(Connection.Events.MESSAGE, msg);
 	}
 	setOnMessage(cb: (msg: Message) => void) {
-		this.callback = cb;
+		this.emitter.addListener(Connection.Events.MESSAGE, cb);
+	}
+	on(event: string, listener: (...args: any[]) => void) {
+		this.emitter.on(event, listener);
+	}
+	once(event: string, listener: (...args: any[]) => void) {
+		this.emitter.once(event, listener);
+	}
+	close() {
+		this.socket.end();
 	}
 }
 
-export function probeId(peer: {host: string, port: number})/*: Promise<BannerMessage>*/ {
-	console.log("Creating demo socket");
+export function probeId(peer: { host: string, port: number })/*: Promise<BannerMessage>*/ {
+	console.log("Creating probe socket");
 	let promise = new Promise<string>(function (resolve, reject) {
 		const client = TcpSocket.createConnection(peer);
 		const connection = new Connection(client);
-		connection.setOnMessage((msg:Message) => {
-			if(connection.peerId)
+		connection.once(Connection.Events.INITIALIZED, () => {
+			connection.close();
+			if (connection.peerId)
 				resolve(connection.peerId);
+			else
+				reject("Something went wrong");
 		})
 	});
 	return promise;
@@ -113,25 +133,28 @@ class Networking {
 		console.log("listen callback:", this.server.address());
 	}
 	private async incomingConnection(socket: TcpSocket.Socket) {
-		socket.on('data', (data) => {
-			socket.write('Echo server ' + data);
+		// socket.on("data", (data) => {
+		// 	if (data instanceof Buffer)
+		// 		data = data.toString("utf-8");
+		// 	console.log("[Server]server got:", data);
+		// });
+
+		socket.on("error", (error) => {
+			console.log("[Server]An error ocurred with client socket ", error);
 		});
 
-		socket.on('error', (error) => {
-			console.log('An error ocurred with client socket ', error);
+		socket.on("close", (error) => {
+			console.log("[Server]Closed connection with ", socket.address());
 		});
-
-		socket.on('close', (error) => {
-			console.log('Closed connection with ', socket.address());
-		});
-		socket.write("Hello from server:\n");
 		socket.write(JSON.stringify(await generateBanner()) + "\n");
+		let connect = new Connection(socket);
+		connect.once(Connection.Events.INITIALIZED, () => { console.log("Server got id:", connect.peerId); });
 	}
 	getAddress() {
 		return this.server.address();
 	}
-	probeId(host: string, port: number){
-		return probeId({host, port});
+	probeId(host: string, port: number) {
+		return probeId({ host, port });
 	}
 	close() {
 		console.log("Closing server!");
