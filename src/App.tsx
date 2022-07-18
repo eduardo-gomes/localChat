@@ -11,6 +11,7 @@ import InfoScreen from './lib/infoScreen';
 import { getId } from './lib/id';
 
 import ContactManager, { getContacts, setCallback } from "./lib/contactManager";
+import { networking } from './lib/socket';
 
 type RootStackParamList = {
 	Home: undefined;
@@ -19,6 +20,8 @@ type RootStackParamList = {
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+
+networking.log();
 
 class App extends React.Component {
 	state: {
@@ -63,6 +66,7 @@ class App extends React.Component {
 	}
 	componentWillUnmount() {
 		console.log("Will unmount app");
+		networking.close();
 	}
 };
 

@@ -1,10 +1,15 @@
+enum MessageTypes {
+	BANNER = "Banner"
+};
+
 interface Message {
-	type: String
+	type: string
 };
 
 type BannerMessage = {
-	type: "Banner",
-	id: String
+	type: MessageTypes.BANNER,
+	id: string
 };
 
-export type {Message, BannerMessage};
+export type { Message, BannerMessage };
+export { MessageTypes };

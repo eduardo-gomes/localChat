@@ -1,46 +1,81 @@
+import { Buffer } from "buffer";
 import TcpSocket from "react-native-tcp-socket";
 import { getId } from "./id";
-import type { BannerMessage } from "./netMessages";
-
-const options = {
-	port: 5000,
-	host: "10.0.2.200"
-};
+import { BannerMessage, Message, MessageTypes } from "./netMessages";
 
 async function generateBanner() {
 	let obj: BannerMessage = {
-		type: "Banner",
+		type: MessageTypes.BANNER,
 		id: await getId()
 	};
 	return obj;
 }
 
-export function sendHelloWorld() {
+class Connection {
+	callback: ((msg: Message) => void) | undefined;
+	buffer;
+	socket;
+	peerId: string | undefined;
+	constructor(socket: TcpSocket.Socket) {
+		this.socket = socket;
+		this.buffer = "";
+		socket.on('connect', () => {
+			generateBanner().then((banner) => {
+				let bannerStr = JSON.stringify(banner) + '\n';
+				socket.write(bannerStr, "utf-8");
+			});
+		})
+		socket.on('data', (data) => {this.data(data);});
+		socket.on('error', function (error) {
+			console.log(error);
+		});
+		socket.on('close', function () {
+			console.log('Connection closed!');
+		});
+
+	}
+	data(data: Buffer | string) {
+		if (data instanceof Buffer)
+			data = data.toString("utf-8");
+		console.log("Data received:", data);
+		this.buffer = this.buffer.concat(data);
+		let n = this.buffer.indexOf('\n');
+
+		if (n != -1) {
+			let lines: string[] = [];
+			let split = this.buffer.split('\n');
+			this.buffer = split.pop() ?? '';
+			lines = lines.concat(split);
+			lines.forEach((line) => {
+				const msg = JSON.parse(line) as Message;//TODO: handle errors
+				console.log("Line:", msg);
+				console.log("message:", msg.type);
+				this.onMessage(msg);
+			});
+		}
+	}
+	private onMessage(msg: Message) {
+		if (msg.type == MessageTypes.BANNER) {
+			this.peerId = (msg as BannerMessage).id;
+		}
+		if (this.callback) this.callback(msg);
+	}
+	setOnMessage(cb: (msg: Message) => void) {
+		this.callback = cb;
+	}
+}
+
+export function probeId(peer: {host: string, port: number})/*: Promise<BannerMessage>*/ {
 	console.log("Creating demo socket");
-
-	// Create socket
-	const client = TcpSocket.createConnection(options, () => {
-		// Write on the socket
-		client.write('Hello server!\n', "utf-8", () => { client.destroy() });
-
-		console.log("Local address:", client.localAddress);
-		console.log("remote address:", client.remoteAddress);
-
-		// Close socket
-		// client.destroy();
+	let promise = new Promise<string>(function (resolve, reject) {
+		const client = TcpSocket.createConnection(peer);
+		const connection = new Connection(client);
+		connection.setOnMessage((msg:Message) => {
+			if(connection.peerId)
+				resolve(connection.peerId);
+		})
 	});
-
-	client.on('data', function (data) {
-		console.log('message was received', data);
-	});
-
-	client.on('error', function (error) {
-		console.log(error);
-	});
-
-	client.on('close', function () {
-		console.log('Connection closed!');
-	});
+	return promise;
 }
 
 class Networking {
@@ -48,6 +83,7 @@ class Networking {
 	listeningPort: number;
 	listeningAddress: string;
 	static counter: number = 0;
+	static instance: Networking = new Networking(5000);
 	counter: number = 0;
 
 	constructor(listeningPort: number, listeningAddress: string = "0.0.0.0") {
@@ -58,12 +94,14 @@ class Networking {
 			let str = String(e);
 			if (str.search("EADDRINUSE") != -1) {
 				this.counter++;
-				console.log('Address in use, retrying...', this.counter);
+				if (this.counter % 10 == 0)
+					console.log('Address in use, retrying...', this.counter);
 				setTimeout(() => {
 					this.server.close();
 					this.listen();
 				}, 1000);
-			}});
+			}
+		});
 		this.listen();
 		Networking.counter++;
 		console.log("Instance:", Networking.counter, "Server port:", this.server.address());
@@ -92,12 +130,18 @@ class Networking {
 	getAddress() {
 		return this.server.address();
 	}
-	sendHello() {
-		sendHelloWorld();
+	probeId(host: string, port: number){
+		return probeId({host, port});
 	}
-
+	close() {
+		console.log("Closing server!");
+		this.server.close(console.error);
+	}
+	log() {
+		console.log("networking info:\n\taddress:", this.server.address());
+	}
 }
 
-const networking = new Networking(5000);
+const networking = Networking.instance;
 
 export { networking };
