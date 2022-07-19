@@ -1,6 +1,7 @@
 import { NetInfoStateType, useNetInfo } from "@react-native-community/netinfo";
 import { Buffer } from "buffer";
 import { EventEmitter } from "events";
+import { useEffect, useState } from "react";
 import TcpSocket from "react-native-tcp-socket";
 import { getId } from "./id";
 import { BannerMessage, Message, MessageTypes } from "./netMessages";
@@ -105,7 +106,7 @@ class Networking {
 	listeningAddress: string;
 	static counter: number = 0;
 	static instance: Networking = new Networking(5000);
-	counter: number = 0;
+	isBound = false;
 
 	constructor(listeningPort: number, listeningAddress: string = "0.0.0.0") {
 		this.server = TcpSocket.createServer((socket) => { this.incomingConnection(socket); });
@@ -114,23 +115,23 @@ class Networking {
 		this.server.on('error', (e: any) => {
 			let str = String(e);
 			if (str.search("EADDRINUSE") != -1) {
-				this.counter++;
-				if (this.counter % 10 == 0)
-					console.log('Address in use, retrying...', this.counter);
+				console.log('Address in use, retrying with port', ++this.listeningPort);
 				setTimeout(() => {
 					this.server.close();
 					this.listen();
 				}, 1000);
 			}
 		});
+		this.server.on("listening", () => { this.onListen(); });
 		this.listen();
 		Networking.counter++;
 		console.log("Instance:", Networking.counter, "Server port:", this.server.address());
 	}
 	private listen() {
-		this.server.listen({ port: this.listeningPort, host: this.listeningAddress }, () => { this.callback(); });
+		this.server.listen({ port: this.listeningPort, host: this.listeningAddress });
 	}
-	private callback() {
+	private onListen() {
+		this.isBound = true;
 		console.log("listen callback:", this.server.address());
 	}
 	private async incomingConnection(socket: TcpSocket.Socket) {
@@ -164,14 +165,25 @@ class Networking {
 	log() {
 		console.log("networking info:\n\taddress:", this.server.address());
 	}
-	useAddress(){
+	useAddress() {
 		let addr = networking.getAddress()?.address;
 		const port = networking.getAddress()?.port;
 		const netInfo = useNetInfo();
 		if (netInfo.type == NetInfoStateType.wifi) {
 			addr = netInfo.details.ipAddress ?? addr;
 		}
-		return {address: addr, port: port};
+		return { address: addr, port: port };
+	}
+	useServerStatus() {
+		const [status, setStatus] = useState({ running: this.isBound });
+		useEffect(() => {
+			const handleStatusChange = () => {
+				setStatus({ running: this.isBound });
+			};
+			this.server.on("listening", handleStatusChange);
+			return () => { this.server.removeListener("listening", handleStatusChange); }
+		})
+		return status;
 	}
 }
 
