@@ -22,7 +22,7 @@ import { getStyles } from './styles';
 function ContactEntry({ contact, navigation }: { contact: ContactInfo } & Navigation) {
 	const styles = getStyles(useColorScheme());
 	function long() {
-		console.log("edit contact");
+		navigation.navigate("EditContact", contact);
 	}
 	function short() {
 		console.log("open chat");

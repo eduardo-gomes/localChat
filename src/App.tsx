@@ -12,11 +12,13 @@ import { getId } from './lib/id';
 
 import { getContacts, setCallback } from "./lib/contactManager";
 import { networking } from './lib/socket';
+import EditContact from './screens/editContact';
 
 type RootStackParamList = {
 	Home: undefined;
 	AddContact: undefined;
 	NetInfo: undefined;
+	EditContact: ContactInfo;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -59,6 +61,10 @@ class App extends React.Component {
 					<Stack.Screen
 						name="AddContact"
 						component={AddContact}
+					/>
+					<Stack.Screen
+						name="EditContact"
+						component={EditContact}
 					/>
 					{__DEV__ ? <Stack.Screen
 						name="NetInfo"
