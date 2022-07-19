@@ -12,10 +12,14 @@ function AddContact() {
 		if (name?.length == 0)
 			name = undefined;
 
+		if (id.length == 0)
+			return false;//Can't create contact with null id
+
 		ContactManager.addContact({
 			name: name ?? `Contato ${id}`,
 			uid: id
 		});
+		return true;
 	}
 	const status = networking.useServerStatus();
 	const address = networking.useAddress();
@@ -44,7 +48,7 @@ function AddContact() {
 			<TextInput style={styles.textFormInput} value={name} onChangeText={setName}></TextInput>
 			<Text style={styles.labelForm}>ID</Text>
 			<TextInput style={styles.textFormInput} value={id} onChangeText={setId} placeholder="Insira o id, ou obtenha a partir do endereço"></TextInput>
-			<Button title='Salvar' onPress={() => { saveContactById(id, name); clear(); }} />
+			<Button title='Salvar' onPress={() => { if (saveContactById(id, name)) clear(); }} />
 		</View>
 	);
 }

@@ -10,7 +10,6 @@ import { getNavigatorTheme, NavigatorTheme } from './styles';
 import InfoScreen from './lib/infoScreen';
 import { getId } from './lib/id';
 
-import { getContacts, setCallback } from "./lib/contactManager";
 import { networking } from './lib/socket';
 import EditContact from './screens/editContact';
 
@@ -27,7 +26,6 @@ networking.log();
 
 class App extends React.Component {
 	state: {
-		contactInfo: ContactInfo[],
 		theme: NavigatorTheme
 	};
 	schemeListener;
@@ -35,15 +33,9 @@ class App extends React.Component {
 	constructor(props: {}) {
 		super(props);
 		this.state = {
-			contactInfo: [],
 			theme: getNavigatorTheme(Appearance.getColorScheme())
 		};
 		this.schemeListener = Appearance.addChangeListener((preferences: Appearance.AppearancePreferences) => {this.setState({theme: getNavigatorTheme(preferences.colorScheme)})});
-
-		// ContactManager.clear();//clear dummy contacts
-
-		this.state.contactInfo = getContacts();
-		setCallback((contactInfo) => this.setState({ contactInfo }));
 
 		getId().then(console.info);
 	}

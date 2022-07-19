@@ -2,46 +2,48 @@ import { MMKVLoader, useMMKVStorage } from "react-native-mmkv-storage";
 
 import { ContactInfo } from '../lib';
 
-
+const CONTACTS_KEY = "CONTACTS";
 const contacts = new MMKVLoader().withInstanceID("contacts").initialize();
 
-let inMemory: ContactInfo[] | null;
+type ContactInfoMap = {
+	[key: string]: ContactInfo
+};
+
+contacts.clearStore();
 
 function getContacts() {
-	if (inMemory) return inMemory;
-	inMemory = contacts.getArray("CONTACTS") as ContactInfo[] ?? [];
-	return inMemory;
+	let object = contacts.getMap(CONTACTS_KEY) as ContactInfoMap ?? {};
+	return object;
 }
-
-type CallbackType = ((contacts: ContactInfo[]) => void) | undefined;
-let callback: CallbackType;
 
 function addContact(contact: ContactInfo) {
-	inMemory = getContacts();
-	inMemory.push(contact);
-	contacts.setArray("CONTACTS", inMemory);
-	if (callback) callback(inMemory);
+	let object = getContacts();
+	object[contact.uid] = contact;
+	contacts.setMap(CONTACTS_KEY, object);
 }
 
-function setCallback(_callback: CallbackType){
-	callback = _callback;
+function contactHook() {
+	const [contactsArray] = useMMKVStorage<ContactInfoMap>(CONTACTS_KEY, contacts, {});
+	const infos = Object.values(contactsArray);
+	console.log("ContactInfoMap values:", infos);
+	return infos;
 }
 
-function contactHook(){
-	const [contactsArray, setContacts] = useMMKVStorage<ContactInfo[]>("CONTACTS", contacts, []);
-	return contactsArray;
+function setName(contact: ContactInfo, name: string) {
+	const newContact = { ...contact, name };
+	let list = getContacts();
+	list[contact.uid] = newContact;
+	const res = contacts.setMap(CONTACTS_KEY, list);
+	console.log("setName, new contact is:", newContact, "res:", res);
 }
 
 const ContactManager = {
 	getContacts,
 	addContact,
 	contactHook,
-	clear: () =>{
-		inMemory = [];
-		contacts.setArray("CONTACTS", inMemory);
-	}
+	setName,
 };
 
 export default ContactManager;
 
-export { getContacts, addContact, setCallback };
+export { getContacts, addContact };
