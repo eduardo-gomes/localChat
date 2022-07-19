@@ -6,11 +6,11 @@ import AddContact from './addContact';
 
 import ContactList from './contactList';
 import { ContactInfo } from './lib';
-import { getNavigatorTheme } from './styles';
+import { getNavigatorTheme, NavigatorTheme } from './styles';
 import InfoScreen from './lib/infoScreen';
 import { getId } from './lib/id';
 
-import ContactManager, { getContacts, setCallback } from "./lib/contactManager";
+import { getContacts, setCallback } from "./lib/contactManager";
 import { networking } from './lib/socket';
 
 type RootStackParamList = {
@@ -26,15 +26,19 @@ networking.log();
 class App extends React.Component {
 	state: {
 		contactInfo: ContactInfo[],
+		theme: NavigatorTheme
 	};
+	schemeListener;
 
 	constructor(props: {}) {
 		super(props);
 		this.state = {
 			contactInfo: [],
+			theme: getNavigatorTheme(Appearance.getColorScheme())
 		};
+		this.schemeListener = Appearance.addChangeListener((preferences: Appearance.AppearancePreferences) => {this.setState({theme: getNavigatorTheme(preferences.colorScheme)})});
 
-		ContactManager.clear();//clear dummy contacts
+		// ContactManager.clear();//clear dummy contacts
 
 		this.state.contactInfo = getContacts();
 		setCallback((contactInfo) => this.setState({ contactInfo }));
@@ -42,7 +46,7 @@ class App extends React.Component {
 		getId().then(console.info);
 	}
 	render() {
-		const theme = getNavigatorTheme(Appearance.getColorScheme());
+		const theme = this.state.theme;
 
 		return (
 			<NavigationContainer theme={theme}>
@@ -65,6 +69,7 @@ class App extends React.Component {
 		);
 	}
 	componentWillUnmount() {
+		this.schemeListener.remove();
 		console.log("Will unmount app");
 		networking.close();
 	}

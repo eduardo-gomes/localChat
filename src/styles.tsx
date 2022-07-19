@@ -1,6 +1,6 @@
 import {
 	StyleSheet,
-	Appearance,
+	useColorScheme,
 } from 'react-native';
 
 
@@ -22,7 +22,7 @@ function getNavigatorTheme(scheme?: string | null) {
 
 	const refStyle = getStyles(scheme);
 
-	const topBar = styles.mainColor.color;
+	const topBar = refStyle.mainColor.color;
 
 	return {
 		dark: isDarkMode,
@@ -36,6 +36,8 @@ function getNavigatorTheme(scheme?: string | null) {
 		}
 	}
 }
+
+type NavigatorTheme = ReturnType<typeof getNavigatorTheme>;
 
 function getStyles(scheme?: string | null) {
 	const isDarkMode = scheme === 'dark';
@@ -102,6 +104,5 @@ function getStyles(scheme?: string | null) {
 	});
 }
 
-const styles = getStyles(Appearance.getColorScheme());
-
-export { styles, getStyles, Colors, getNavigatorTheme };
+export { getStyles, Colors, getNavigatorTheme, useColorScheme };
+export type { NavigatorTheme };

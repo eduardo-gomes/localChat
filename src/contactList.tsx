@@ -16,10 +16,11 @@ import PlusButton from './botãoRedondo';
 import { ContactInfo } from './lib';
 import ContactManager from './lib/contactManager';
 import { InfoButton } from './lib/infoScreen';
-import { getStyles, styles } from './styles';
+import { getStyles } from './styles';
 
 
 function ContactEntry({ contact, navigation }: { contact: ContactInfo } & Navigation) {
+	const styles = getStyles(useColorScheme());
 	function long() {
 		console.log("edit contact");
 	}
@@ -40,6 +41,7 @@ type Props = NativeStackScreenProps<RootStackParamList, "Home">;
 type Navigation = { navigation: NativeStackNavigationProp<RootStackParamList, "Home"> };
 
 function EmptyListPrompt({ navigation }: Navigation) {
+	const styles = getStyles(useColorScheme());
 	return (
 		<View style={styles.emptyListPrompt}>
 			<Text style={styles.emptyListPromptText}>Parece que você não possui nenhum contato.

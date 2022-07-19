@@ -1,12 +1,13 @@
 import React from 'react';
-import { Button, Text, TextInput, View } from "react-native";
+import { Button, Text, TextInput, useColorScheme, View } from "react-native";
 import ContactManager from './lib/contactManager';
 import ID from './lib/id';
 import { networking } from './lib/socket';
-import { styles } from './styles';
+import { getStyles } from './styles';
 
 
 function AddContact() {
+	const styles = getStyles(useColorScheme());
 	function saveContactById(id: string, name?: string) {
 		if (name?.length == 0)
 			name = undefined;
