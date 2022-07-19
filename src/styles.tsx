@@ -50,11 +50,13 @@ function getStyles(scheme?: string | null) {
 		sectionTitle: {
 			fontSize: 24,
 			fontWeight: '600',
+			color: isDarkMode ? Colors.white : Colors.black,
 		},
 		sectionDescription: {
 			marginTop: 8,
 			fontSize: 18,
 			fontWeight: '400',
+			color: isDarkMode ? Colors.light : Colors.dark,
 		},
 		highlight: {
 			fontWeight: '700',

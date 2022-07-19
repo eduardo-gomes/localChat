@@ -1,7 +1,8 @@
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack';
 import React from 'react';
 import {
 	Button,
+	Pressable,
 	SafeAreaView,
 	ScrollView,
 	StatusBar,
@@ -15,44 +16,30 @@ import PlusButton from './botãoRedondo';
 import { ContactInfo } from './lib';
 import ContactManager from './lib/contactManager';
 import { InfoButton } from './lib/infoScreen';
-import { Colors, getStyles, styles } from './styles';
+import { getStyles, styles } from './styles';
 
 
-const Section: React.FC<{
-	// children: React.ReactNode;
-	contact: ContactInfo;
-}> = ({ /*children,*/ contact }) => {
-	const isDarkMode = useColorScheme() === 'dark';
+function ContactEntry({ contact, navigation }: { contact: ContactInfo } & Navigation) {
+	function long() {
+		console.log("edit contact");
+	}
+	function short() {
+		console.log("open chat");
+	}
 	return (
-		<View style={styles.contactInfoList} >
-			<Text
-				style={
-					[
-						styles.sectionTitle,
-						{
-							color: isDarkMode ? Colors.white : Colors.black,
-						},
-					]
-				}>
-				{contact.name}
-			</Text>
-			<Text
-				style={
-					[
-						styles.sectionDescription,
-						{
-							color: isDarkMode ? Colors.light : Colors.dark,
-						},
-					]} >
-				{/* {children} */}
-			</Text>
-		</View>
+		<Pressable style={styles.contactInfoList}
+			onLongPress={long} onPress={short}
+		>
+			<Text style={styles.sectionTitle}>{contact.name}</Text>
+			<Text style={styles.sectionDescription}>ID: {contact.uid}</Text>
+		</Pressable>
 	);
 };
 
 type Props = NativeStackScreenProps<RootStackParamList, "Home">;
+type Navigation = { navigation: NativeStackNavigationProp<RootStackParamList, "Home"> };
 
-function EmptyListPrompt({ navigation, route }: Props) {
+function EmptyListPrompt({ navigation }: Navigation) {
 	return (
 		<View style={styles.emptyListPrompt}>
 			<Text style={styles.emptyListPromptText}>Parece que você não possui nenhum contato.
@@ -62,16 +49,6 @@ function EmptyListPrompt({ navigation, route }: Props) {
 		</View>
 	)
 };
-
-function ContactListMap({ list }: { list: ContactInfo[] }) {
-	return (
-		<>
-			{list.map((contact) => {
-				const info = contact;
-				return (<Section contact={info} key={info.uid} />); //TODO: use uid
-			})}
-		</>);
-}
 
 function ContactList({ navigation, route }: Props) {
 	const isDarkMode = useColorScheme() === 'dark';
@@ -91,16 +68,11 @@ function ContactList({ navigation, route }: Props) {
 			<ScrollView
 				contentInsetAdjustmentBehavior="automatic"
 				style={backgroundStyle} >
-				<View
-					style={
-						{
-							backgroundColor: isDarkMode ? Colors.black : Colors.white,
-						}
-					}>
-					<ContactListMap list={contactList} />
+				<View style={styles.background}>
+					{contactList.map((contact) => <ContactEntry key={contact.uid} contact={contact} navigation={navigation} />)}
 				</View>
 			</ScrollView>
-			{hasContacts ? <EmptyListPrompt navigation={navigation} route={route} /> : null}
+			{hasContacts ? <EmptyListPrompt navigation={navigation} /> : null}
 		</SafeAreaView >
 		{!hasContacts ? <View style={{
 			position: 'absolute',
