@@ -9,12 +9,7 @@ import ID from "./id";
 
 
 export default function InfoScreen() {
-	let addr = networking.getAddress()?.address;
-	const port = networking.getAddress()?.port;
-	const netInfo = useNetInfo();
-	if (netInfo.type == NetInfoStateType.wifi) {
-		addr = netInfo.details.ipAddress ?? addr;
-	}
+	const {address, port} = networking.useAddress();
 	const [clientIp, onChangeClientIp] = React.useState("10.0.2.200");
 	const [clientPort, onChangeClientPort] = React.useState("5000");
 	const [gotId, onGetId] = React.useState<string | null>(null);
@@ -22,7 +17,7 @@ export default function InfoScreen() {
 	return (
 		<View>
 			<Text>Info screen</Text>
-			<Text>Local IP:{addr}, port: {port}</Text>
+			<Text>Local IP:{address}, port: {port}</Text>
 			<Text>IP:</Text><TextInput value={clientIp} onChangeText={onChangeClientIp}></TextInput>
 			<Text>Port:</Text><TextInput value={clientPort} onChangeText={onChangeClientPort}></TextInput>
 			<Button title="Send hello" onPress={() => {

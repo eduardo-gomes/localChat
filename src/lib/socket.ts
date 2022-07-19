@@ -1,3 +1,4 @@
+import { NetInfoStateType, useNetInfo } from "@react-native-community/netinfo";
 import { Buffer } from "buffer";
 import { EventEmitter } from "events";
 import TcpSocket from "react-native-tcp-socket";
@@ -162,6 +163,15 @@ class Networking {
 	}
 	log() {
 		console.log("networking info:\n\taddress:", this.server.address());
+	}
+	useAddress(){
+		let addr = networking.getAddress()?.address;
+		const port = networking.getAddress()?.port;
+		const netInfo = useNetInfo();
+		if (netInfo.type == NetInfoStateType.wifi) {
+			addr = netInfo.details.ipAddress ?? addr;
+		}
+		return {address: addr, port: port};
 	}
 }
 
