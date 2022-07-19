@@ -80,6 +80,17 @@ function getStyles(scheme?: string | null) {
 			fontSize: 18,
 			textAlign: 'center'
 		},
+		labelForm: {
+			paddingLeft: 10,
+			fontSize: 20
+		},
+		textFormInput: {
+			backgroundColor: Colors.dark,
+			// margin: 5,
+			paddingLeft: 15,
+			paddingRight: 15,
+			borderRadius: 30,
+		},
 		mainColor: {
 			color: isDarkMode ? Colors.darkCyan : Colors.lightCyan,
 		},
