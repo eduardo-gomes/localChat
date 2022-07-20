@@ -1,7 +1,8 @@
 import React from "react";
 import { Pressable, Text } from "react-native";
 
-function PlusButton({ size, background, color, onPress }: { size: number, background: string, color: string, onPress: () => void }) {
+function PlusButton({ size, background, color, onPress, character }: { size: number, background: string, color: string, character?: string, onPress: () => void }) {
+	if (!character) character = "+";
 	return (
 		<Pressable style={{
 			backgroundColor: background,
@@ -22,7 +23,7 @@ function PlusButton({ size, background, color, onPress }: { size: number, backgr
 				textAlign: "center",
 				textAlignVertical: "bottom",
 				color
-			}}>+</Text>
+			}}>{character}</Text>
 		</Pressable>
 	);
 }
