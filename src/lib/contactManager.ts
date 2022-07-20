@@ -9,8 +9,6 @@ type ContactInfoMap = {
 	[key: string]: ContactInfo
 };
 
-contacts.clearStore();
-
 function getContacts() {
 	let object = contacts.getMap(CONTACTS_KEY) as ContactInfoMap ?? {};
 	return object;
@@ -37,13 +35,34 @@ function setName(contact: ContactInfo, name: string) {
 	console.log("setName, new contact is:", newContact, "res:", res);
 }
 
+const messages = new MMKVLoader().withInstanceID("messages").initialize();
+type Message = {
+	content: string
+};
+
+function useMessages(contact: ContactInfo) {
+	const [message] = useMMKVStorage<Message[]>(contact.uid, messages, []);
+	return message
+}
+
+function sendMessage(contact: ContactInfo, message: Message) {
+	let array = messages.getArray(contact.uid) ?? [];
+	array.push(message);
+	messages.setArray(contact.uid, array);
+}
+
+
 const ContactManager = {
 	getContacts,
 	addContact,
 	contactHook,
 	setName,
+	useMessages,
+	sendMessage
 };
 
 export default ContactManager;
 
 export { getContacts, addContact };
+
+export type { Message };
