@@ -17,7 +17,7 @@ function InputBox({ onPress }: { onPress: (msg: string) => void }) {
 	return (
 		<View style={{ margin: 5, flexDirection: "row" }}>
 			<TextInput style={{ ...styles.textFormInput, flexGrow: 1 }} value={message} onChangeText={setMessage} placeholder="Mensagem" />
-			<BotãoRedondo size={50} background={styles.mainColor.color} color={styles.secondaryColor.color} character="⭆" onPress={callback} />
+			<BotãoRedondo size={50} background={styles.mainColor.color} color={styles.secondaryColor.color} character="➤" onPress={callback} />
 		</View>);
 }
 
