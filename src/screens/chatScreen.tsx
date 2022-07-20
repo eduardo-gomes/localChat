@@ -12,7 +12,10 @@ type Props = NativeStackScreenProps<RootStackParamList, "EditContact">;
 function InputBox({ onPress }: { onPress: (msg: string) => void }) {
 	const styles = getStyles(useColorScheme());
 	const [message, setMessage] = React.useState("");
-	function callback() { onPress(message); }
+	function callback() {
+		onPress(message);
+		setMessage("");
+	}
 
 	return (
 		<View style={{ margin: 5, flexDirection: "row" }}>
