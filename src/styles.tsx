@@ -89,7 +89,7 @@ function getStyles(scheme?: string | null) {
 			fontSize: 20
 		},
 		textFormInput: {
-			backgroundColor: Colors.dark,
+			backgroundColor: isDarkMode ? Colors.dark : Colors.light,
 			// margin: 5,
 			paddingLeft: 15,
 			paddingRight: 15,
@@ -100,7 +100,24 @@ function getStyles(scheme?: string | null) {
 		},
 		secondaryColor: {
 			color: isDarkMode ? Colors.lighter : Colors.darker,
-		}
+		},
+		messageBubble: {
+			backgroundColor: isDarkMode ? Colors.darkCyan : Colors.lightCyan,
+			borderRadius: 10,
+			padding: 5,//half border radius
+			marginTop: 10
+		},
+		messageText: {
+			margin: 3,
+			marginBottom: 10
+		},
+		messageStatus: {
+			fontSize: 10,
+			fontStyle: "italic",
+			textAlign: "right",
+			padding: 5,//half bubble border radius
+			paddingTop: 0,
+		},
 	});
 }
 
