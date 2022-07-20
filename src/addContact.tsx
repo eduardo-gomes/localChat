@@ -5,6 +5,21 @@ import ID from './lib/id';
 import { networking } from './lib/socket';
 import { getStyles } from './styles';
 
+function GetIdFromAddress({ onGetId }: { onGetId: (id: string) => void }) {
+	const styles = getStyles(useColorScheme());
+	const [clientIp, onChangeClientIp] = React.useState("");
+	const [clientPort, onChangeClientPort] = React.useState("");
+
+	return (
+		<View style={{ marginTop: 20 }}>
+			<Text style={styles.labelForm}>O ID pode ser obtido a partir do endereço e porta do dispositivo:</Text>
+			<TextInput style={styles.textFormInput} placeholder="Endereço" value={clientIp} onChangeText={onChangeClientIp} />
+			<TextInput style={styles.textFormInput} placeholder="Porta" value={clientPort} onChangeText={onChangeClientPort} />
+			<Button title='obter id' onPress={() => {
+				networking.probeId(clientIp, Number(clientPort)).then(onGetId);
+			}} />
+		</View>);
+}
 
 function AddContact() {
 	const styles = getStyles(useColorScheme());
@@ -49,6 +64,7 @@ function AddContact() {
 			<Text style={styles.labelForm}>ID</Text>
 			<TextInput style={styles.textFormInput} value={id} onChangeText={setId} placeholder="Insira o id, ou obtenha a partir do endereço"></TextInput>
 			<Button title='Salvar' onPress={() => { if (saveContactById(id, name)) clear(); }} />
+			{id.length ? undefined : <GetIdFromAddress onGetId={setId} />}
 		</View>
 	);
 }
