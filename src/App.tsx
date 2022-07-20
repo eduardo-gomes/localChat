@@ -12,12 +12,14 @@ import { getId } from './lib/id';
 
 import { networking } from './lib/socket';
 import EditContact from './screens/editContact';
+import ChatScreen from './screens/chatScreen';
 
 type RootStackParamList = {
 	Home: undefined;
 	AddContact: undefined;
 	NetInfo: undefined;
 	EditContact: ContactInfo;
+	ChatScreen: ContactInfo;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -35,7 +37,7 @@ class App extends React.Component {
 		this.state = {
 			theme: getNavigatorTheme(Appearance.getColorScheme())
 		};
-		this.schemeListener = Appearance.addChangeListener((preferences: Appearance.AppearancePreferences) => {this.setState({theme: getNavigatorTheme(preferences.colorScheme)})});
+		this.schemeListener = Appearance.addChangeListener((preferences: Appearance.AppearancePreferences) => { this.setState({ theme: getNavigatorTheme(preferences.colorScheme) }) });
 
 		getId().then(console.info);
 	}
@@ -57,6 +59,10 @@ class App extends React.Component {
 					<Stack.Screen
 						name="EditContact"
 						component={EditContact}
+					/>
+					<Stack.Screen
+						name="ChatScreen"
+						component={ChatScreen}
 					/>
 					{__DEV__ ? <Stack.Screen
 						name="NetInfo"

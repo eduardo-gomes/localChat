@@ -25,7 +25,7 @@ function ContactEntry({ contact, navigation }: { contact: ContactInfo } & Naviga
 		navigation.navigate("EditContact", contact);
 	}
 	function short() {
-		console.log("open chat");
+		navigation.navigate("ChatScreen", contact);
 	}
 	return (
 		<Pressable style={styles.contactInfoList}
