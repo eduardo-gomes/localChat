@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import TcpSocket from "react-native-tcp-socket";
 import { getId } from "./id";
 import { BannerMessage, Message, MessageTypes } from "./netMessages";
+import ConnectionManager from "./connectionManager";
 
 async function generateBanner() {
 	let obj: BannerMessage = {
@@ -15,6 +16,9 @@ async function generateBanner() {
 }
 
 class Connection {
+	isConnected() {
+		return this.peerId != undefined;
+	}
 	callback: ((msg: Message) => void) | undefined;
 	buffer;
 	socket;
@@ -34,13 +38,11 @@ class Connection {
 		socket.on('error', function (error) {
 			console.log(error);
 		});
-		socket.on('close', function () {
-			console.log("[Connection]Connection closed with:", socket.remoteAddress, socket.remotePort);
-		});
-
+		socket.on('close', () => { this.onClose(); });
+		this.emitter.once(Connection.Events.INITIALIZED, () => { ConnectionManager.onNewConnection(this); })
 	}
 	getPeerId() {
-		return this.peerId;
+		return this.peerId ?? "NOT_CONNECTED";
 	}
 	data(data: Buffer | string) {
 		if (data instanceof Buffer)
@@ -78,6 +80,9 @@ class Connection {
 	}
 	once(event: string, listener: (...args: any[]) => void) {
 		this.emitter.once(event, listener);
+	}
+	onClose() {
+		ConnectionManager.removeConnection(this);
 	}
 	close() {
 		this.socket.end();
@@ -189,4 +194,4 @@ class Networking {
 
 const networking = Networking.instance;
 
-export { networking };
+export { networking, Connection };
