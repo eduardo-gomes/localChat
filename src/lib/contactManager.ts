@@ -35,22 +35,7 @@ function setName(contact: ContactInfo, name: string) {
 	console.log("setName, new contact is:", newContact, "res:", res);
 }
 
-const messages = new MMKVLoader().withInstanceID("messages").initialize();
-type Message = {
-	content: string
-};
-
-function useMessages(contact: ContactInfo) {
-	const [message] = useMMKVStorage<Message[]>(contact.uid, messages, []);
-	return message
-}
-
-function sendMessage(contact: ContactInfo, message: Message) {
-	let array = messages.getArray(contact.uid) ?? [];
-	array.push(message);
-	messages.setArray(contact.uid, array);
-}
-
+import { useMessages, sendMessage } from "./messageTransmitter";
 
 const ContactManager = {
 	getContacts,
@@ -65,4 +50,5 @@ export default ContactManager;
 
 export { getContacts, addContact };
 
+import type { Message } from "./messageTransmitter";
 export type { Message };
