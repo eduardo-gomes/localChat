@@ -4,7 +4,7 @@ import { EventEmitter } from "events";
 import { useEffect, useState } from "react";
 import TcpSocket from "react-native-tcp-socket";
 import { getId } from "./id";
-import { BannerMessage, Message, MessageTypes } from "./netMessages";
+import { BannerMessage, NetMessage, MessageTypes, TextMessage } from "./netMessages";
 import ConnectionManager from "./connectionManager";
 
 async function generateBanner() {
@@ -19,7 +19,7 @@ class Connection {
 	isConnected() {
 		return this.peerId != undefined;
 	}
-	callback: ((msg: Message) => void) | undefined;
+	callback: ((msg: NetMessage) => void) | undefined;
 	buffer;
 	socket;
 	peerId: string | undefined;
@@ -29,10 +29,7 @@ class Connection {
 		this.socket = socket;
 		this.buffer = "";
 		socket.on('connect', () => {
-			generateBanner().then((banner) => {
-				let bannerStr = JSON.stringify(banner) + '\n';
-				socket.write(bannerStr, "utf-8");
-			});
+			generateBanner().then((banner) => { this.send(banner); });
 		})
 		socket.on('data', (data) => { this.data(data); });
 		socket.on('error', function (error) {
@@ -41,6 +38,11 @@ class Connection {
 		socket.on('close', () => { this.onClose(); });
 		this.emitter.once(Connection.Events.INITIALIZED, () => { ConnectionManager.onNewConnection(this); })
 	}
+	send(msg: NetMessage) {
+		let msgStr = JSON.stringify(msg) + '\n';
+		this.socket.write(msgStr, "utf-8");
+		// console.log("SENT:", msgStr);
+	}
 	getPeerId() {
 		return this.peerId ?? "NOT_CONNECTED";
 	}
@@ -48,6 +50,7 @@ class Connection {
 		if (data instanceof Buffer)
 			data = data.toString("utf-8");
 		// console.log("[Connection]Data received:", data);
+		// console.log("[Connection]buffer:", this.buffer);
 		this.buffer = this.buffer.concat(data);
 		let n = this.buffer.indexOf('\n');
 
@@ -57,22 +60,23 @@ class Connection {
 			this.buffer = split.pop() ?? '';
 			lines = lines.concat(split);
 			lines.forEach((line) => {
-				const msg = JSON.parse(line) as Message;//TODO: handle errors
+				const msg = JSON.parse(line) as NetMessage;//TODO: handle errors
 				// console.log("[Connection]Line:", msg);
 				// console.log("[Connection]message:", msg.type);
 				this.onMessage(msg);
 			});
 		}
 	}
-	private onMessage(msg: Message) {
+	private onMessage(msg: NetMessage) {
 		if (msg.type == MessageTypes.BANNER) {
 			this.peerId = (msg as BannerMessage).id;
 			this.emitter.emit(Connection.Events.INITIALIZED);
 			console.log("[Connection]peer banner id:", this.peerId);
+		} else if (msg.type == MessageTypes.TEXT_MESSAGE) {
+			this.emitter.emit(Connection.Events.MESSAGE, msg);
 		}
-		this.emitter.emit(Connection.Events.MESSAGE, msg);
 	}
-	setOnMessage(cb: (msg: Message) => void) {
+	setOnMessage(cb: (msg: TextMessage) => void) {
 		this.emitter.addListener(Connection.Events.MESSAGE, cb);
 	}
 	on(event: string, listener: (...args: any[]) => void) {
@@ -95,7 +99,7 @@ export function probeId(peer: { host: string, port: number })/*: Promise<BannerM
 		const client = TcpSocket.createConnection(peer);
 		const connection = new Connection(client);
 		connection.once(Connection.Events.INITIALIZED, () => {
-			connection.close();
+			// connection.close(); //Maintain connected
 			if (connection.peerId)
 				resolve(connection.peerId);
 			else
