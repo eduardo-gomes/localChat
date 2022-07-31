@@ -7,16 +7,21 @@ import { MessageTypes, TextMessage } from "./netMessages";
 const messages = new MMKVLoader().withInstanceID("messages").initialize();
 type Message = {
 	content: string,
+	id?: string,
 	sent?: boolean
+};
+interface MessageWithId extends Message {
+	id: string
 };
 
 function useMessages(contact: ContactInfo) {
-	const [message] = useMMKVStorage<Message[]>(contact.uid, messages, []);
+	const [message] = useMMKVStorage<MessageWithId[]>(contact.uid, messages, []);
 	return message
 }
 
 function sendMessage(contact: ContactInfo, message: Message) {
 	let array = messages.getArray(contact.uid) ?? [];
+	message.id = array.length.toString();
 	array.push(message);
 	messages.setArray(contact.uid, array);
 	queueMessage(contact.uid, message);
@@ -35,10 +40,10 @@ function queueMessage(contactId: string, message: Message) {
 
 function onConnect(connection: Connection) {
 	const uid = connection.getPeerId();
-	const pending = pendingMessages.getArray<Message>(uid) ?? [];
+	const pending = pendingMessages.getArray<MessageWithId>(uid) ?? [];
 	console.log(`[Message manager] Connected to ${uid}, pendingMessages:`, pending);
 	pending.forEach((msg) => {
-		let netMsg: TextMessage = { type: MessageTypes.TEXT_MESSAGE, content: msg.content };
+		let netMsg: TextMessage = { type: MessageTypes.TEXT_MESSAGE, content: msg.content, id: msg.id };
 		connection.send(netMsg);
 	})
 }

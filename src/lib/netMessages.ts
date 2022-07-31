@@ -14,7 +14,8 @@ type BannerMessage = {
 
 type TextMessage = {
 	type: MessageTypes.TEXT_MESSAGE,
-	content: string
+	content: string,
+	id: string
 };
 
 export type { NetMessage, BannerMessage, TextMessage };
