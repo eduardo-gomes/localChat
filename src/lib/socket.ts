@@ -36,7 +36,6 @@ class Connection {
 			console.log(error);
 		});
 		socket.on('close', () => { this.onClose(); });
-		this.emitter.once(Connection.Events.INITIALIZED, () => { ConnectionManager.onNewConnection(this); })
 	}
 	send(msg: NetMessage) {
 		let msgStr = JSON.stringify(msg) + '\n';
@@ -159,7 +158,9 @@ class Networking {
 		});
 		socket.write(JSON.stringify(await generateBanner()) + "\n");
 		let connect = new Connection(socket);
-		connect.once(Connection.Events.INITIALIZED, () => { console.log("Server got id:", connect.peerId); });
+		connect.once(Connection.Events.INITIALIZED, () => {
+			ConnectionManager.onNewConnection(connect);
+		});
 	}
 	getAddress() {
 		return this.server.address();

@@ -35,6 +35,11 @@ function setName(contact: ContactInfo, name: string) {
 	console.log("setName, new contact is:", newContact, "res:", res);
 }
 
+function hasUser(uid: string) {
+	let list = getContacts();
+	return list.hasOwnProperty(uid);
+}
+
 import { useMessages, sendMessage } from "./messageTransmitter";
 
 const ContactManager = {
@@ -43,7 +48,8 @@ const ContactManager = {
 	contactHook,
 	setName,
 	useMessages,
-	sendMessage
+	sendMessage,
+	hasUser,
 };
 
 export default ContactManager;
