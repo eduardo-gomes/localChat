@@ -12,7 +12,7 @@ function onNewConnection(connection: Connection) {
 		connection.close();
 		return;
 	}
-	connection.setOnMessage((msg) => { console.log("Got message:", msg); });
+	connection.setOnMessage((msg) => { console.log("From", uid, "got message:", msg); });
 	activeConnections.set(uid, connection);
 	console.log("[Connection manager] got connection to", uid);
 	onConnect(connection);

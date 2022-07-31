@@ -9,7 +9,7 @@ import ID from "./id";
 
 
 export default function InfoScreen() {
-	const {address, port} = networking.useAddress();
+	const { address, port } = networking.useAddress();
 	const [clientIp, onChangeClientIp] = React.useState("10.0.2.200");
 	const [clientPort, onChangeClientPort] = React.useState("5000");
 	const [gotId, onGetId] = React.useState<string | null>(null);
@@ -20,8 +20,8 @@ export default function InfoScreen() {
 			<Text>Local IP:{address}, port: {port}</Text>
 			<Text>IP:</Text><TextInput value={clientIp} onChangeText={onChangeClientIp}></TextInput>
 			<Text>Port:</Text><TextInput value={clientPort} onChangeText={onChangeClientPort}></TextInput>
-			<Button title="Send hello" onPress={() => {
-				networking.probeId(clientIp, Number(clientPort)).then(onGetId);
+			<Button title="Connect and get ID" onPress={() => {
+				networking.connectAndGetId(clientIp, Number(clientPort)).then(onGetId);
 			}} />
 			{gotId ? <Text>Id: {gotId}</Text> : undefined}
 			<Button title="Reset ID" onPress={ID.resetId} />

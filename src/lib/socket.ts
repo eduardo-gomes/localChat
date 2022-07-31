@@ -70,7 +70,7 @@ class Connection {
 		if (msg.type == MessageTypes.BANNER) {
 			this.peerId = (msg as BannerMessage).id;
 			this.emitter.emit(Connection.Events.INITIALIZED);
-			console.log("[Connection]peer banner id:", this.peerId);
+			// console.log("[Connection]peer banner id:", this.peerId);
 		} else if (msg.type == MessageTypes.TEXT_MESSAGE) {
 			this.emitter.emit(Connection.Events.MESSAGE, msg);
 		}
@@ -92,16 +92,17 @@ class Connection {
 	}
 }
 
-export function probeId(peer: { host: string, port: number })/*: Promise<BannerMessage>*/ {
+export function connectAndGetId(peer: { host: string, port: number })/*: Promise<BannerMessage>*/ {
 	console.log("Creating probe socket");
 	let promise = new Promise<string>(function (resolve, reject) {
 		const client = TcpSocket.createConnection(peer);
 		const connection = new Connection(client);
 		connection.once(Connection.Events.INITIALIZED, () => {
 			// connection.close(); //Maintain connected
-			if (connection.peerId)
+			if (connection.peerId){
+				ConnectionManager.onNewConnection(connection);
 				resolve(connection.peerId);
-			else
+			}else
 				reject("Something went wrong");
 		})
 	});
@@ -165,8 +166,8 @@ class Networking {
 	getAddress() {
 		return this.server.address();
 	}
-	probeId(host: string, port: number) {
-		return probeId({ host, port });
+	connectAndGetId(host: string, port: number) {
+		return connectAndGetId({ host, port });
 	}
 	close() {
 		console.log("Closing server!");

@@ -16,7 +16,7 @@ function GetIdFromAddress({ onGetId }: { onGetId: (id: string) => void }) {
 			<TextInput style={styles.textFormInput} placeholder="Endereço" value={clientIp} onChangeText={onChangeClientIp} />
 			<TextInput style={styles.textFormInput} placeholder="Porta" value={clientPort} onChangeText={onChangeClientPort} />
 			<Button title='obter id' onPress={() => {
-				networking.probeId(clientIp, Number(clientPort)).then(onGetId);
+				networking.connectAndGetId(clientIp, Number(clientPort)).then(onGetId);
 			}} />
 		</View>);
 }
