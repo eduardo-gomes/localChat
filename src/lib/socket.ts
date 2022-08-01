@@ -4,7 +4,7 @@ import { EventEmitter } from "events";
 import { useEffect, useState } from "react";
 import TcpSocket from "react-native-tcp-socket";
 import { getId } from "./id";
-import { BannerMessage, NetMessage, MessageTypes, TextMessage } from "./netMessages";
+import { BannerMessage, NetMessage, MessageTypes, TextMessage, TextMessageAck } from "./netMessages";
 import ConnectionManager from "./connectionManager";
 
 async function generateBanner() {
@@ -71,11 +71,11 @@ class Connection {
 			this.peerId = (msg as BannerMessage).id;
 			this.emitter.emit(Connection.Events.INITIALIZED);
 			// console.log("[Connection]peer banner id:", this.peerId);
-		} else if (msg.type == MessageTypes.TEXT_MESSAGE) {
+		} else if (msg.type == MessageTypes.TEXT_MESSAGE || msg.type == MessageTypes.TEXT_MESSAGE_ACK) {
 			this.emitter.emit(Connection.Events.MESSAGE, msg);
 		}
 	}
-	setOnMessage(cb: (msg: TextMessage) => void) {
+	setOnMessage(cb: (msg: TextMessage | TextMessageAck) => void) {
 		this.emitter.addListener(Connection.Events.MESSAGE, cb);
 	}
 	on(event: string, listener: (...args: any[]) => void) {
@@ -99,10 +99,10 @@ export function connectAndGetId(peer: { host: string, port: number })/*: Promise
 		const connection = new Connection(client);
 		connection.once(Connection.Events.INITIALIZED, () => {
 			// connection.close(); //Maintain connected
-			if (connection.peerId){
+			if (connection.peerId) {
 				ConnectionManager.onNewConnection(connection);
 				resolve(connection.peerId);
-			}else
+			} else
 				reject("Something went wrong");
 		})
 	});

@@ -1,6 +1,7 @@
 enum MessageTypes {
 	BANNER = "BANNER",
-	TEXT_MESSAGE = "MESSAGE_TXT"
+	TEXT_MESSAGE = "MESSAGE_TXT",
+	TEXT_MESSAGE_ACK = "TXT_ACK"
 };
 
 interface NetMessage {
@@ -18,5 +19,10 @@ type TextMessage = {
 	id: string
 };
 
-export type { NetMessage, BannerMessage, TextMessage };
+type TextMessageAck = {
+	type: MessageTypes.TEXT_MESSAGE_ACK,
+	id: string
+};
+
+export type { NetMessage, BannerMessage, TextMessage, TextMessageAck };
 export { MessageTypes };

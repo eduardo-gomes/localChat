@@ -1,5 +1,5 @@
 import ContactManager from "./contactManager";
-import { onConnect } from "./messageTransmitter";
+import * as MessageTransmitter from "./messageTransmitter";
 import { Connection } from "./socket";
 
 let activeConnections = new Map<string, Connection>();
@@ -12,10 +12,10 @@ function onNewConnection(connection: Connection) {
 		connection.close();
 		return;
 	}
-	connection.setOnMessage((msg) => { console.log("From", uid, "got message:", msg); });
+	connection.setOnMessage((msg) => { MessageTransmitter.onIncomingMessage({ origin: connection, msg }); });
 	activeConnections.set(uid, connection);
 	console.log("[Connection manager] got connection to", uid);
-	onConnect(connection);
+	MessageTransmitter.onConnect(connection);
 }
 
 function removeConnection(connection: Connection) {
