@@ -34,12 +34,14 @@ function MessageView({ msg }: { msg: Message }) {
 	const messageReceived: ViewStyle = {
 		alignSelf: "flex-start",
 		marginLeft: 20,
-		...styles.messageBubble
+		...styles.messageBubble,
+		...styles.receivedMessageColor
 	};
+	const isLocal = msg.local ?? false;
+	const style = isLocal ? messageSent : messageReceived;
 	return (
-		<View style={messageSent}>
+		<View style={style}>
 			<Text style={styles.messageText}>{msg.content}</Text>
-			<Text style={styles.messageStatus}>Não enviada</Text>
 		</View>
 	);
 }

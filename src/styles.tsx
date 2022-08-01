@@ -107,6 +107,9 @@ function getStyles(scheme?: string | null) {
 			padding: 5,//half border radius
 			marginTop: 10
 		},
+		receivedMessageColor: {
+			backgroundColor: isDarkMode ? 'blue' : 'lightblue'
+		},
 		messageText: {
 			margin: 3,
 			marginBottom: 10
