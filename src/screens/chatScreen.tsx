@@ -38,10 +38,12 @@ function MessageView({ msg }: { msg: Message }) {
 		...styles.receivedMessageColor
 	};
 	const isLocal = msg.local ?? false;
+	const notSent = isLocal && !msg.sent;
 	const style = isLocal ? messageSent : messageReceived;
 	return (
 		<View style={style}>
 			<Text style={styles.messageText}>{msg.content}</Text>
+			{notSent ? <Text style={styles.messageStatus}>Não enviada</Text> : undefined}
 		</View>
 	);
 }
