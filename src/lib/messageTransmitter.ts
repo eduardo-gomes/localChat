@@ -3,6 +3,7 @@ import { MMKVLoader, useMMKVStorage } from "react-native-mmkv-storage";
 
 import type { ContactInfo } from '../lib';
 import { MessageTypes, TextMessage, TextMessageAck } from "./netMessages";
+import { sendIfConnected } from "./messageConnectedTransmit";
 
 const messages = new MMKVLoader().withInstanceID("messages").initialize();
 type Message = {
@@ -57,6 +58,7 @@ function queueMessage(contactId: string, message: StoredMessage) {
 	let array = pendingMessages.getArray<MessageWithId>(contactId) ?? [];
 	array.push(message);
 	pendingMessages.setArray(contactId, array);
+	sendIfConnected(contactId);
 }
 
 function unQueueMessage(contactId: string, messageId: string) {
@@ -65,10 +67,10 @@ function unQueueMessage(contactId: string, messageId: string) {
 	pendingMessages.setArray(contactId, removed);
 }
 
-function onConnect(connection: Connection) {
+function sendToConnection(connection: Connection) {
 	const uid = connection.getPeerId();
 	const pending = pendingMessages.getArray<MessageWithId>(uid) ?? [];
-	console.log(`[Message manager] Connected to ${uid}, pendingMessages:`, pending);
+	console.log(`[Message manager] send to ${uid}, pendingMessages:`, pending);
 	pending.forEach((msg) => {
 		let netMsg: TextMessage = { type: MessageTypes.TEXT_MESSAGE, content: msg.content, id: msg.id };
 		connection.send(netMsg);
@@ -84,5 +86,5 @@ function onIncomingMessage({ origin, msg }: { origin: Connection, msg: TextMessa
 		unQueueMessage(uid, msg.id);
 }
 
-export { useMessages, sendMessage, onConnect, onIncomingMessage };
+export { useMessages, sendMessage, sendToConnection, onIncomingMessage };
 export type { Message };

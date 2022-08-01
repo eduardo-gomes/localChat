@@ -15,7 +15,7 @@ function onNewConnection(connection: Connection) {
 	connection.setOnMessage((msg) => { MessageTransmitter.onIncomingMessage({ origin: connection, msg }); });
 	activeConnections.set(uid, connection);
 	console.log("[Connection manager] got connection to", uid);
-	MessageTransmitter.onConnect(connection);
+	MessageTransmitter.sendToConnection(connection);
 }
 
 function removeConnection(connection: Connection) {
@@ -26,9 +26,16 @@ function removeConnection(connection: Connection) {
 	console.log(`[Connection manager] removed connection to ${uid}`);
 }
 
+function sendIfConnected(uid: string) {
+	let connection = activeConnections.get(uid);
+	if (connection)
+		MessageTransmitter.sendToConnection(connection);
+}
+
 const connectionManager = {
 	onNewConnection,
-	removeConnection
+	removeConnection,
+	sendIfConnected
 };
 
 export default connectionManager;
