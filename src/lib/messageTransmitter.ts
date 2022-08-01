@@ -17,7 +17,6 @@ interface MessageWithId extends Message {
 };
 
 interface StoredMessage extends MessageWithId {
-	id: string,
 	local: boolean
 };
 
@@ -30,13 +29,13 @@ function sendMessage(contact: ContactInfo, messageSource: Message) {
 	const id = new Date().toISOString();
 	const local = true;
 	const content = messageSource.content;
-	let message: StoredMessage = { content, id, local };
+	let message: StoredMessage = { content, id, local, sent: false };
 	appendMessage(contact.uid, message);
-	queueMessage(contact.uid, message);
+	sendIfConnected(contact.uid);
 }
 
 function appendMessage(uid: string, message: StoredMessage) {
-	let array = messages.getArray(uid) ?? [];
+	let array = messages.getArray<StoredMessage>(uid) ?? [];
 	array.push(message);
 	messages.setArray(uid, array);
 }
@@ -53,23 +52,22 @@ function receiveMessage(uid: string, textMessage: TextMessage) {
 
 import { Connection } from "./socket";
 
-const pendingMessages = new MMKVLoader().withInstanceID("pendingMessages").initialize();
-function queueMessage(contactId: string, message: StoredMessage) {
-	let array = pendingMessages.getArray<MessageWithId>(contactId) ?? [];
-	array.push(message);
-	pendingMessages.setArray(contactId, array);
-	sendIfConnected(contactId);
+function getPending(contactId: string){
+	let array = messages.getArray<StoredMessage>(contactId) ?? [];
+	return array.filter(msg => msg.local && msg.sent == false);
 }
 
 function unQueueMessage(contactId: string, messageId: string) {
-	let array = pendingMessages.getArray<MessageWithId>(contactId) ?? [];
-	let removed = array.filter(msg => msg.id != messageId);
-	pendingMessages.setArray(contactId, removed);
+	let array = messages.getArray<StoredMessage>(contactId) ?? [];
+	let found = array.find(msg => msg.local && msg.id == messageId);
+	if(!found) return;
+	found.sent = true;
+	messages.setArray(contactId, array);
 }
 
 function sendToConnection(connection: Connection) {
 	const uid = connection.getPeerId();
-	const pending = pendingMessages.getArray<MessageWithId>(uid) ?? [];
+	const pending = getPending(uid);
 	console.log(`[Message manager] send to ${uid}, pendingMessages:`, pending);
 	pending.forEach((msg) => {
 		let netMsg: TextMessage = { type: MessageTypes.TEXT_MESSAGE, content: msg.content, id: msg.id };
