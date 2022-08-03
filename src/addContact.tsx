@@ -1,5 +1,7 @@
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React from 'react';
 import { Button, Text, TextInput, useColorScheme, View } from "react-native";
+import { RootStackParamList } from './App';
 import ContactManager from './lib/contactManager';
 import ID from './lib/id';
 import { networking } from './lib/socket';
@@ -13,15 +15,18 @@ function GetIdFromAddress({ onGetId }: { onGetId: (id: string) => void }) {
 	return (
 		<View style={{ marginTop: 20 }}>
 			<Text style={styles.labelForm}>O ID pode ser obtido a partir do endereço e porta do dispositivo:</Text>
+			<Text style={styles.labelForm}>Caso o contato já esteja salvo, a conexão será estabelecida manualmente. E você será levado a tela anterior</Text>
 			<TextInput style={styles.textFormInput} placeholder="Endereço" value={clientIp} onChangeText={onChangeClientIp} />
 			<TextInput style={styles.textFormInput} placeholder="Porta" value={clientPort} onChangeText={onChangeClientPort} />
-			<Button title='obter id' onPress={() => {
+			<Button title='obter id | conectar' onPress={() => {
 				networking.connectAndGetId(clientIp, Number(clientPort)).then(onGetId);
 			}} />
 		</View>);
 }
 
-function AddContact() {
+type Props = NativeStackScreenProps<RootStackParamList, "AddContact">;
+
+function AddContact({ navigation, route }: Props) {
 	const styles = getStyles(useColorScheme());
 	function saveContactById(id: string, name?: string) {
 		if (name?.length == 0)
@@ -54,6 +59,12 @@ function AddContact() {
 		setId("");
 	}
 
+	function onSetId(id: string) {
+		setId(id);
+		if (ContactManager.hasUser(id))
+			navigation.goBack();
+	}
+
 	return (
 		<View style={{ padding: 10 }}>
 			<Text>Server is {status.running ? "" : "not "}running</Text>
@@ -64,7 +75,7 @@ function AddContact() {
 			<Text style={styles.labelForm}>ID</Text>
 			<TextInput style={styles.textFormInput} value={id} onChangeText={setId} placeholder="Insira o id, ou obtenha a partir do endereço"></TextInput>
 			<Button title='Salvar' onPress={() => { if (saveContactById(id, name)) clear(); }} />
-			{id.length ? undefined : <GetIdFromAddress onGetId={setId} />}
+			{id.length ? undefined : <GetIdFromAddress onGetId={onSetId} />}
 		</View>
 	);
 }
