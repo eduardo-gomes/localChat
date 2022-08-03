@@ -27,13 +27,13 @@ type FileMessage = {
 	id: string
 };
 
-type FileRequestMessage = { //peer asks for file, in response to FileMessage
+type FileRequestMessage = { //peer asks for file
 	type: MessageTypes.FILE_MESSAGE_REQUEST,
 	port: number, //Port where peer should send file
 	id: string
 };
 
-type FileAckMessage = { //Reports if file was successfully received
+type FileAckMessage = { //Reports if fileMessage was successfully received
 	type: MessageTypes.FILE_MESSAGE_ACK,
 	id: string
 };

@@ -3,7 +3,7 @@ import { MMKVLoader, useMMKVStorage } from "react-native-mmkv-storage";
 import RNFS from "react-native-fs";
 
 import type { ContactInfo } from '../lib';
-import { MessageTypes, TextMessage, TextMessageAck, FileMessage, FileRequestMessage } from "./netMessages";
+import { MessageTypes, TextMessage, TextMessageAck, FileMessage, FileRequestMessage, FileAckMessage } from "./netMessages";
 import { sendIfConnected } from "./messageConnectedTransmit";
 
 const messages = new MMKVLoader().withInstanceID("messages").initialize();
@@ -88,11 +88,11 @@ function findMessage(uid: string, id: string) {
 	return array.find(msg => msg.id == id);
 }
 
-function setFileSent(uid: string, id: string, value: boolean) {
-	let array = messages.getArray<StoredAnyMessage>(uid) ?? [];
+function setFileTransferred(uid: string, id: string, value: boolean) {
+	let array = messages.getArray<StoredFileMessage>(uid) ?? [];
 	const pos = array.findIndex(msg => msg.id == id);
 	if (pos == -1) return undefined;
-	array[pos].sent = value;
+	array[pos].transferred = value;
 }
 
 ////Networking:
@@ -110,10 +110,10 @@ async function receiveFileMessageAndRequest(origin: Connection, uid: string, fil
 	console.log(`[Transmitter] File request: ids: ${uid}/${fileMsg.id}, name: ${fileMsg.name}, size: ${fileMsg.size}, toPort: ${port}, saveTo: ${path}`);
 	receiver.getPromise.then(() => {
 		console.log("[Transmitter]Received:", fileMsg);
-		setFileSent(uid, fileMsg.id, true);
+		setFileTransferred(uid, fileMsg.id, true);
 	}).catch((e) => {
 		console.warn("[Transmitter]File receiver Failed:", e);
-		setFileSent(uid, fileMsg.id, false);
+		setFileTransferred(uid, fileMsg.id, false);
 	});
 }
 
@@ -156,14 +156,14 @@ function sendFileToUser(uid: string, request: FileRequestMessage, address: strin
 	}
 	if ((stored as StoredFileMessage).isFile) {
 		const { path, size } = (stored as StoredFileMessage);
-		sendFile(path, size, { address, port: request.port }).then(() => setFileSent(uid, request.id, true)).catch(() => {
+		sendFile(path, size, { address, port: request.port }).then(() => setFileTransferred(uid, request.id, true)).catch(() => {
 			console.log("Failed do send file", uid, request.id);
-			setFileSent(uid, request.id, false);
+			setFileTransferred(uid, request.id, false);
 		});
 	}
 }
 
-function onIncomingMessage({ origin, msg }: { origin: Connection, msg: TextMessage | TextMessageAck | FileMessage | FileRequestMessage }) {
+function onIncomingMessage({ origin, msg }: { origin: Connection, msg: TextMessage | TextMessageAck | FileMessage | FileRequestMessage | FileAckMessage }) {
 	const uid = origin.getPeerId()
 	if (msg.type == MessageTypes.TEXT_MESSAGE) {
 		// console.log("From", uid, "got message:", msg);
@@ -171,6 +171,7 @@ function onIncomingMessage({ origin, msg }: { origin: Connection, msg: TextMessa
 		receiveMessage(uid, msg);
 	} else if (msg.type == MessageTypes.FILE_MESSAGE) {
 		console.log("Received file message:", msg);
+		origin.send({ type: MessageTypes.FILE_MESSAGE_ACK, id: msg.id });
 		receiveFileMessageAndRequest(origin, uid, msg);
 	} else if (msg.type == MessageTypes.FILE_MESSAGE_REQUEST) {
 		console.log("Received file request:", msg);
