@@ -4,7 +4,7 @@ import { EventEmitter } from "events";
 import { useEffect, useState } from "react";
 import TcpSocket from "react-native-tcp-socket";
 import { getId } from "./id";
-import { BannerMessage, NetMessage, MessageTypes, TextMessage, TextMessageAck } from "./netMessages";
+import { BannerMessage, NetMessage, MessageTypes, TextMessage, TextMessageAck, FileMessage, FileRequestMessage, FileAckMessage } from "./netMessages";
 import ConnectionManager from "./connectionManager";
 
 async function generateBanner() {
@@ -81,7 +81,10 @@ class Connection {
 			this.emitter.emit(Connection.Events.MESSAGE, msg);
 		}
 	}
-	setOnMessage(cb: (msg: TextMessage | TextMessageAck) => void) {
+	get address(){
+		return this.socket.remoteAddress;
+	}
+	setOnMessage(cb: (msg: TextMessage | TextMessageAck | FileMessage | FileRequestMessage | FileAckMessage) => void) {
 		this.emitter.addListener(Connection.Events.MESSAGE, cb);
 	}
 	on(event: string, listener: (...args: any[]) => void) {
