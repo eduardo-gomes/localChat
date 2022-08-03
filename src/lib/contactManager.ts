@@ -10,9 +10,9 @@ type ContactInfoMap = {
 };
 
 function getContacts() {
-	let object = contacts.getMap(CONTACTS_KEY) as ContactInfoMap;
-	if (typeof object != "object")
-		object = Object.create(null);
+	let object = contacts.getMap(CONTACTS_KEY) as ContactInfoMap ?? {};
+	if (object instanceof Array)
+		object = {};
 	return object;
 }
 
@@ -23,7 +23,7 @@ function addContact(contact: ContactInfo) {
 }
 
 function contactHook() {
-	const [contactsArray] = useMMKVStorage<ContactInfoMap>(CONTACTS_KEY, contacts, Object.create(null));
+	const [contactsArray] = useMMKVStorage<ContactInfoMap>(CONTACTS_KEY, contacts, {});
 	const infos = Object.values(contactsArray);
 	console.log("ContactInfoMap values:", infos);
 	return infos;
