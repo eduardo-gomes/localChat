@@ -1,7 +1,7 @@
 import React from "react";
 import { Pressable, Text } from "react-native";
 
-function PlusButton({ size, background, color, onPress, character }: { size: number, background: string, color: string, character?: string, onPress: () => void }) {
+function PlusButton({ size, background, color, onPress, onLongPress, character }: { size: number, background: string, color: string, character?: string, onPress: () => void, onLongPress?: () => void }) {
 	if (!character) character = "+";
 	return (
 		<Pressable style={{
@@ -14,6 +14,7 @@ function PlusButton({ size, background, color, onPress, character }: { size: num
 			alignItems: 'center',
 		}}
 			onPress={onPress}
+			onLongPress={onLongPress}
 			android_ripple={{
 				radius: size / 2
 			}}
