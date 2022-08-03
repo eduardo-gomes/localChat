@@ -19,13 +19,18 @@ interface MessageWithId extends Message {
 interface StoredMessage extends MessageWithId {
 	local: boolean
 };
-type StoredFileMessage = {
+type File = {
 	path: string,
-	id: string,
+	id?: string,
 	name: string,
 	size: number,
-	isFile: true,
+	isFile?: true,
 	sent?: boolean,
+	local?: boolean,
+};
+interface StoredFileMessage extends File {
+	id: string,
+	isFile: true,
 	local: boolean,
 };
 type StoredAnyMessage = StoredFileMessage | StoredMessage;
@@ -35,11 +40,19 @@ function useMessages(contact: ContactInfo) {
 	return message
 }
 
-function sendMessage(contact: ContactInfo, messageSource: Message) {
+function sendMessage(contact: ContactInfo, messageSource: Message | File) {
 	const id = new Date().toISOString();
 	const local = true;
-	const content = messageSource.content;
-	let message: StoredMessage = { content, id, local, sent: false };
+	function parse(src: Message | File): StoredAnyMessage {
+		if ((src as Message).content) {
+			const content = (src as Message).content;
+			return { content, id, local, sent: false };
+		} else {
+			let src = messageSource as File;
+			return { isFile: true, id, local, sent: false, name: src.name, path: src.path, size: src.size };
+		}
+	}
+	let message = parse(messageSource);
 	appendMessage(contact.uid, message);
 	sendIfConnected(contact.uid);
 }
@@ -105,4 +118,4 @@ function onIncomingMessage({ origin, msg }: { origin: Connection, msg: TextMessa
 }
 
 export { useMessages, sendMessage, sendToConnection, onIncomingMessage };
-export type { Message };
+export type { Message, File };

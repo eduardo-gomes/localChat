@@ -6,11 +6,12 @@ import { getStyles } from "../styles";
 import DocumentPicker from "react-native-document-picker";
 
 import BotãoRedondo from "../botãoRedondo";
-import ContactManager, { Message } from "../lib/contactManager";
+import ContactManager from "../lib/contactManager";
+import type { Message, File } from "../lib/messageTransmitter";
 
 type Props = NativeStackScreenProps<RootStackParamList, "EditContact">;
 
-function InputBox({ onText: onPress }: { onText: (msg: string) => void }) {
+function InputBox({ onText: onPress, onFile }: { onText: (msg: string) => void, onFile: (file: File) => void }) {
 	const styles = getStyles(useColorScheme());
 	const [message, setMessage] = React.useState("");
 	function callback() {
@@ -21,9 +22,11 @@ function InputBox({ onText: onPress }: { onText: (msg: string) => void }) {
 	function fileCallback() {
 		console.log("Want to send file");
 		DocumentPicker.pick({ copyTo: "documentDirectory" }).then((result) => {
-			let mapped = result.map(resp => ({ name: resp.name, size: resp.size, sourceUri: resp.fileCopyUri })).filter(element => element.sourceUri);
-			console.log(mapped);
-		});
+			let mapped = result
+				.map(({ name, size, fileCopyUri }) => ({ name, size, path: fileCopyUri }))
+				.filter(element => element.size != null && element.path != null) as { name: string, size: number, path: string }[];
+			mapped.forEach(onFile);
+		}).catch(e => console.warn("Failed to pick file:", e));
 	}
 
 	return (
@@ -34,7 +37,7 @@ function InputBox({ onText: onPress }: { onText: (msg: string) => void }) {
 		</View>);
 }
 
-function MessageView({ msg }: { msg: Message }) {
+function MessageView({ msg }: { msg: Message | File }) {
 	const styles = getStyles(useColorScheme());
 	const messageSent: ViewStyle = {
 		alignSelf: "flex-end",
@@ -50,12 +53,25 @@ function MessageView({ msg }: { msg: Message }) {
 	const isLocal = msg.local ?? false;
 	const notSent = isLocal && !msg.sent;
 	const style = isLocal ? messageSent : messageReceived;
-	return (
-		<View style={style}>
-			<Text style={styles.messageText}>{msg.content}</Text>
-			{notSent ? <Text style={styles.messageStatus}>Não enviada</Text> : undefined}
-		</View>
-	);
+
+	let _msg = msg;
+	if ((_msg as Message).content) {
+		const msg = _msg as Message;
+		return (
+			<View style={style}>
+				<Text style={styles.messageText}>{msg.content}</Text>
+				{notSent ? <Text style={styles.messageStatus}>Não enviada</Text> : undefined}
+			</View>
+		);
+	} else {
+		const msg = _msg as File;
+		return (
+			<View style={style}>
+				<Text style={styles.messageText}>File: {msg.name}</Text>
+				<Text style={styles.messageStatus}>Size: {msg.size}{notSent ? "| Não enviada" : undefined}</Text>
+			</View>
+		);
+	}
 }
 
 export default function ChatScreen({ navigation, route }: Props) {
@@ -65,13 +81,16 @@ export default function ChatScreen({ navigation, route }: Props) {
 	function send(message: string) {
 		ContactManager.sendMessage(contact, { content: message });
 	}
+	function sendFile(file: File) {
+		ContactManager.sendMessage(contact, file);
+	}
 	const array = ContactManager.useMessages(contact);
 	return (
 		<View style={{ display: "flex", height: "100%" }}>
 			<ScrollView style={{ flexBasis: 100 }}>
 				{array.map((i, idx) => <MessageView key={idx} msg={i} />)}
 			</ScrollView>
-			<InputBox onText={send} />
+			<InputBox onText={send} onFile={sendFile} />
 		</View>
 	);
 }
