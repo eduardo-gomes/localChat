@@ -1,15 +1,16 @@
 import React, { useEffect } from "react";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
-import { ScrollView, Text, TextInput, TextStyle, useColorScheme, View, ViewStyle } from "react-native";
+import { ScrollView, Text, TextInput, TextStyle, ToastAndroid, useColorScheme, View, ViewStyle } from "react-native";
 import { getStyles } from "../styles";
+import DocumentPicker from "react-native-document-picker";
 
 import BotãoRedondo from "../botãoRedondo";
 import ContactManager, { Message } from "../lib/contactManager";
 
 type Props = NativeStackScreenProps<RootStackParamList, "EditContact">;
 
-function InputBox({ onPress }: { onPress: (msg: string) => void }) {
+function InputBox({ onText: onPress }: { onText: (msg: string) => void }) {
 	const styles = getStyles(useColorScheme());
 	const [message, setMessage] = React.useState("");
 	function callback() {
@@ -17,10 +18,19 @@ function InputBox({ onPress }: { onPress: (msg: string) => void }) {
 		setMessage("");
 	}
 
+	function fileCallback() {
+		console.log("Want to send file");
+		DocumentPicker.pick({ copyTo: "documentDirectory" }).then((result) => {
+			let mapped = result.map(resp => ({ name: resp.name, size: resp.size, sourceUri: resp.fileCopyUri })).filter(element => element.sourceUri);
+			console.log(mapped);
+		});
+	}
+
 	return (
 		<View style={{ margin: 5, flexDirection: "row" }}>
+			<BotãoRedondo size={50} background={styles.mainColor.color} color={styles.secondaryColor.color} character="+" onPress={fileCallback} onLongPress={() => ToastAndroid.show("Enviar arquivo", ToastAndroid.SHORT)} />
 			<TextInput style={{ ...styles.textFormInput, flexGrow: 1 }} value={message} onChangeText={setMessage} placeholder="Mensagem" />
-			<BotãoRedondo size={50} background={styles.mainColor.color} color={styles.secondaryColor.color} character="➤" onPress={callback} />
+			<BotãoRedondo size={50} background={styles.mainColor.color} color={styles.secondaryColor.color} character="➤" onPress={callback} onLongPress={() => ToastAndroid.show("Enviar mensagem", ToastAndroid.SHORT)} />
 		</View>);
 }
 
@@ -61,7 +71,7 @@ export default function ChatScreen({ navigation, route }: Props) {
 			<ScrollView style={{ flexBasis: 100 }}>
 				{array.map((i, idx) => <MessageView key={idx} msg={i} />)}
 			</ScrollView>
-			<InputBox onPress={send} />
+			<InputBox onText={send} />
 		</View>
 	);
 }
