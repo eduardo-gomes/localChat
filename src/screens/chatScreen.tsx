@@ -65,10 +65,11 @@ function MessageView({ msg }: { msg: Message | File }) {
 		);
 	} else {
 		const msg = _msg as File;
+		const fileTransferred: boolean = !(msg.transferred ?? false);
 		return (
 			<View style={style}>
 				<Text style={styles.messageText}>File: {msg.name}</Text>
-				<Text style={styles.messageStatus}>Size: {msg.size}{notSent ? "| Não enviada" : undefined}</Text>
+				<Text style={styles.messageStatus}>Size: {msg.size}{fileTransferred ? " | Não transferido" : undefined}</Text>
 			</View>
 		);
 	}
