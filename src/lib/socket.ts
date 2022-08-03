@@ -71,7 +71,13 @@ class Connection {
 			this.peerId = (msg as BannerMessage).id;
 			this.emitter.emit(Connection.Events.INITIALIZED);
 			// console.log("[Connection]peer banner id:", this.peerId);
-		} else if (msg.type == MessageTypes.TEXT_MESSAGE || msg.type == MessageTypes.TEXT_MESSAGE_ACK) {
+		} else if (
+			msg.type == MessageTypes.TEXT_MESSAGE ||
+			msg.type == MessageTypes.TEXT_MESSAGE_ACK ||
+			msg.type == MessageTypes.FILE_MESSAGE ||
+			msg.type == MessageTypes.FILE_MESSAGE_ACK ||
+			msg.type == MessageTypes.FILE_MESSAGE_REQUEST) {
+
 			this.emitter.emit(Connection.Events.MESSAGE, msg);
 		}
 	}
