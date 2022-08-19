@@ -1,12 +1,11 @@
 ///Store and transmit messages
-import { MMKVLoader, useMMKVStorage } from "react-native-mmkv-storage";
 import RNFS from "react-native-fs";
 
 import type { ContactInfo } from '../lib';
 import { MessageTypes, TextMessage, TextMessageAck, FileMessage, FileDataMessage, FileAckMessage } from "./netMessages";
 import { sendIfConnected } from "./messageConnectedTransmit";
+import { ackMessage, appendMessage, getPending } from "./messageStorage";
 
-const messages = new MMKVLoader().withInstanceID("messages").initialize();
 type Message = {
 	content: string,
 	id?: string,
@@ -37,11 +36,6 @@ interface StoredFileMessage extends File {
 };
 type StoredAnyMessage = StoredFileMessage | StoredMessage;
 
-function useMessages(contact: ContactInfo) {
-	const [message] = useMMKVStorage<StoredAnyMessage[]>(contact.uid, messages, []);
-	return message
-}
-
 function sendMessage(contact: ContactInfo, messageSource: Message | File) {
 	const id = generateRandomUUID();
 	const local = true;
@@ -57,12 +51,6 @@ function sendMessage(contact: ContactInfo, messageSource: Message | File) {
 	let message = parse(messageSource);
 	appendMessage(contact.uid, message);
 	sendIfConnected(contact.uid);
-}
-
-function appendMessage(uid: string, message: StoredAnyMessage) {
-	let array = messages.getArray<StoredAnyMessage>(uid) ?? [];
-	array.push(message);
-	messages.setArray(uid, array);
 }
 
 function receiveMessage(uid: string, textMessage: TextMessage) {
@@ -83,21 +71,8 @@ function receiveFileMessage(uid: string, { name, size, id }: FileMessage): strin
 	return path;
 }
 
-function findMessage(uid: string, id: string) {
-	let array = messages.getArray<StoredAnyMessage>(uid) ?? [];
-	return array.find(msg => msg.id == id);
-}
-
-
 function receiveFileData(uid: string, msg: FileDataMessage) {
 	throw new Error("Function not implemented.");
-}
-
-function setFileTransferred(uid: string, id: string, value: boolean) {
-	let array = messages.getArray<StoredFileMessage>(uid) ?? [];
-	const pos = array.findIndex(msg => msg.id == id);
-	if (pos == -1) return undefined;
-	array[pos].transferred = value;
 }
 
 ////Networking:
@@ -120,19 +95,6 @@ async function receiveFile(uid: string, fileMsg: FileMessage) {
 	// 	console.warn("[Transmitter]File receiver Failed:", e);
 	// 	setFileTransferred(uid, fileMsg.id, false);
 	// });
-}
-
-function getPending(contactId: string) {
-	let array = messages.getArray<StoredAnyMessage>(contactId) ?? [];
-	return array.filter(msg => msg.local && msg.sent == false);
-}
-
-function unQueueMessage(contactId: string, messageId: string) {
-	let array = messages.getArray<StoredAnyMessage>(contactId) ?? [];
-	let found = array.find(msg => msg.local && msg.id == messageId);
-	if (!found) return;
-	found.sent = true;
-	messages.setArray(contactId, array);
 }
 
 function sendToConnection(connection: Connection) {
@@ -168,8 +130,8 @@ function onIncomingMessage({ origin, msg }: { origin: Connection, msg: TextMessa
 		console.log("Received file part:", obj);
 		receiveFileData(uid, msg);
 	} else
-		unQueueMessage(uid, msg.id);
+		ackMessage(uid, msg);
 }
 
-export { useMessages, sendMessage, sendToConnection, onIncomingMessage };
+export { sendMessage, sendToConnection, onIncomingMessage };
 export type { Message, File };

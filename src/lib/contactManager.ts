@@ -42,7 +42,8 @@ function hasUser(uid: string) {
 	return list.hasOwnProperty(uid);
 }
 
-import { useMessages, sendMessage } from "./messageTransmitter";
+import { sendMessage } from "./messageTransmitter";
+import { useMessages } from "./messageStorage";
 
 const ContactManager = {
 	getContacts,
