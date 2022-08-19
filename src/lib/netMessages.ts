@@ -3,11 +3,11 @@ enum MessageTypes {
 	TEXT_MESSAGE = "MESSAGE_TXT",
 	FILE_MESSAGE = "MESSAGE_FILE",
 	FILE_MESSAGE_ACK = "FILE_ACK",
-	FILE_MESSAGE_REQUEST = "FILE_REQUEST",
+	FILE_MESSAGE_DATA = "FILE_DATA",
 	TEXT_MESSAGE_ACK = "TXT_ACK"
 };
 
-type NetMessage = BannerMessage | TextMessage | FileMessage | FileRequestMessage | FileAckMessage | TextMessageAck;
+type NetMessage = BannerMessage | TextMessage | FileMessage | FileDataMessage | FileAckMessage | TextMessageAck;
 
 type BannerMessage = {
 	type: MessageTypes.BANNER,
@@ -27,15 +27,17 @@ type FileMessage = {
 	id: string
 };
 
-type FileRequestMessage = { //peer asks for file
-	type: MessageTypes.FILE_MESSAGE_REQUEST,
-	port: number, //Port where peer should send file
+type FileDataMessage = { //peer asks for file
+	type: MessageTypes.FILE_MESSAGE_DATA,
 	id: string
+	block_offset: number,
+	data_base64: string
 };
 
 type FileAckMessage = { //Reports if fileMessage was successfully received
 	type: MessageTypes.FILE_MESSAGE_ACK,
-	id: string
+	id: string,
+	block_offset: number
 };
 
 type TextMessageAck = {
@@ -43,5 +45,5 @@ type TextMessageAck = {
 	id: string
 };
 
-export type { NetMessage, BannerMessage, TextMessage, TextMessageAck, FileMessage, FileRequestMessage, FileAckMessage };
+export type { NetMessage, BannerMessage, TextMessage, TextMessageAck, FileMessage, FileDataMessage, FileAckMessage };
 export { MessageTypes };

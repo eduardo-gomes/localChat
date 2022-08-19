@@ -4,7 +4,7 @@ import { EventEmitter } from "events";
 import { useEffect, useState } from "react";
 import TcpSocket from "react-native-tcp-socket";
 import { getId } from "./id";
-import { BannerMessage, NetMessage, MessageTypes, TextMessage, TextMessageAck, FileMessage, FileRequestMessage, FileAckMessage } from "./netMessages";
+import { BannerMessage, NetMessage, MessageTypes, TextMessage, TextMessageAck, FileMessage, FileDataMessage, FileAckMessage } from "./netMessages";
 import ConnectionManager from "./connectionManager";
 
 async function generateBanner() {
@@ -76,15 +76,15 @@ class Connection {
 			msg.type == MessageTypes.TEXT_MESSAGE_ACK ||
 			msg.type == MessageTypes.FILE_MESSAGE ||
 			msg.type == MessageTypes.FILE_MESSAGE_ACK ||
-			msg.type == MessageTypes.FILE_MESSAGE_REQUEST) {
+			msg.type == MessageTypes.FILE_MESSAGE_DATA) {
 
 			this.emitter.emit(Connection.Events.MESSAGE, msg);
 		}
 	}
-	get address(){
+	get address() {
 		return this.socket.remoteAddress;
 	}
-	setOnMessage(cb: (msg: TextMessage | TextMessageAck | FileMessage | FileRequestMessage | FileAckMessage) => void) {
+	setOnMessage(cb: (msg: TextMessage | TextMessageAck | FileMessage | FileDataMessage | FileAckMessage) => void) {
 		this.emitter.addListener(Connection.Events.MESSAGE, cb);
 	}
 	on(event: string, listener: (...args: any[]) => void) {

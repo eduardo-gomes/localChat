@@ -3,7 +3,7 @@ import { MMKVLoader, useMMKVStorage } from "react-native-mmkv-storage";
 import RNFS from "react-native-fs";
 
 import type { ContactInfo } from '../lib';
-import { MessageTypes, TextMessage, TextMessageAck, FileMessage, FileRequestMessage, FileAckMessage } from "./netMessages";
+import { MessageTypes, TextMessage, TextMessageAck, FileMessage, FileDataMessage, FileAckMessage } from "./netMessages";
 import { sendIfConnected } from "./messageConnectedTransmit";
 
 const messages = new MMKVLoader().withInstanceID("messages").initialize();
@@ -88,6 +88,11 @@ function findMessage(uid: string, id: string) {
 	return array.find(msg => msg.id == id);
 }
 
+
+function receiveFileData(uid: string, msg: FileDataMessage) {
+	throw new Error("Function not implemented.");
+}
+
 function setFileTransferred(uid: string, id: string, value: boolean) {
 	let array = messages.getArray<StoredFileMessage>(uid) ?? [];
 	const pos = array.findIndex(msg => msg.id == id);
@@ -98,23 +103,23 @@ function setFileTransferred(uid: string, id: string, value: boolean) {
 ////Networking:
 
 import { Connection } from "./socket";
-import { FileReceiver, sendFile } from "./fileSocket";
 import generateRandomUUID from "./uuid";
 
-async function receiveFileMessageAndRequest(origin: Connection, uid: string, fileMsg: FileMessage) {
-	const path = receiveFileMessage(uid, fileMsg);
-	let receiver = new FileReceiver(path, 7000);
-	const { port } = await receiver.addrPromise;
-	console.log()
-	origin.send({ type: MessageTypes.FILE_MESSAGE_REQUEST, id: fileMsg.id, port });
-	console.log(`[Transmitter] File request: ids: ${uid}/${fileMsg.id}, name: ${fileMsg.name}, size: ${fileMsg.size}, toPort: ${port}, saveTo: ${path}`);
-	receiver.getPromise.then(() => {
-		console.log("[Transmitter]Received:", fileMsg);
-		setFileTransferred(uid, fileMsg.id, true);
-	}).catch((e) => {
-		console.warn("[Transmitter]File receiver Failed:", e);
-		setFileTransferred(uid, fileMsg.id, false);
-	});
+async function receiveFile(uid: string, fileMsg: FileMessage) {
+	throw new Error("Not implemented");
+	// const path = receiveFileMessage(uid, fileMsg);
+	// let receiver = new FileReceiver(path, 7000);
+	// const { port } = await receiver.addrPromise;
+	// console.log()
+	// origin.send({ type: MessageTypes.FILE_MESSAGE_REQUEST, id: fileMsg.id, port });
+	// console.log(`[Transmitter] File request: ids: ${uid}/${fileMsg.id}, name: ${fileMsg.name}, size: ${fileMsg.size}, toPort: ${port}, saveTo: ${path}`);
+	// receiver.getPromise.then(() => {
+	// 	console.log("[Transmitter]Received:", fileMsg);
+	// 	setFileTransferred(uid, fileMsg.id, true);
+	// }).catch((e) => {
+	// 	console.warn("[Transmitter]File receiver Failed:", e);
+	// 	setFileTransferred(uid, fileMsg.id, false);
+	// });
 }
 
 function getPending(contactId: string) {
@@ -148,22 +153,7 @@ function sendToConnection(connection: Connection) {
 	})
 }
 
-function sendFileToUser(uid: string, request: FileRequestMessage, address: string) {
-	const stored = findMessage(uid, request.id);
-	if (!stored) {
-		console.log("FileMessage not found, user:", uid, "message id", request.id);
-		return;
-	}
-	if ((stored as StoredFileMessage).isFile) {
-		const { path, size } = (stored as StoredFileMessage);
-		sendFile(path, size, { address, port: request.port }).then(() => setFileTransferred(uid, request.id, true)).catch(() => {
-			console.log("Failed do send file", uid, request.id);
-			setFileTransferred(uid, request.id, false);
-		});
-	}
-}
-
-function onIncomingMessage({ origin, msg }: { origin: Connection, msg: TextMessage | TextMessageAck | FileMessage | FileRequestMessage | FileAckMessage }) {
+function onIncomingMessage({ origin, msg }: { origin: Connection, msg: TextMessage | TextMessageAck | FileMessage | FileDataMessage | FileAckMessage }) {
 	const uid = origin.getPeerId()
 	if (msg.type == MessageTypes.TEXT_MESSAGE) {
 		// console.log("From", uid, "got message:", msg);
@@ -171,14 +161,12 @@ function onIncomingMessage({ origin, msg }: { origin: Connection, msg: TextMessa
 		receiveMessage(uid, msg);
 	} else if (msg.type == MessageTypes.FILE_MESSAGE) {
 		console.log("Received file message:", msg);
-		origin.send({ type: MessageTypes.FILE_MESSAGE_ACK, id: msg.id });
-		receiveFileMessageAndRequest(origin, uid, msg);
-	} else if (msg.type == MessageTypes.FILE_MESSAGE_REQUEST) {
-		console.log("Received file request:", msg);
-		if (origin.address)
-			sendFileToUser(uid, msg, origin.address);
-		else
-			throw "Received request from disconnected socket!";
+		receiveFile(uid, msg);
+	} else if (msg.type == MessageTypes.FILE_MESSAGE_DATA) {
+		let obj = Object.create(msg) as FileDataMessage;
+		obj.data_base64 = `[base64 length ${msg.data_base64.length}]`;
+		console.log("Received file part:", obj);
+		receiveFileData(uid, msg);
 	} else
 		unQueueMessage(uid, msg.id);
 }
