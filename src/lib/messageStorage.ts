@@ -31,6 +31,7 @@ interface StoredFileMessage extends File {
 	id: string,
 	isFile: true,
 	local: boolean,
+	last_confirmed: number
 };
 type StoredAnyMessage = StoredFileMessage | StoredMessage;
 
@@ -55,7 +56,6 @@ function getPending(contactId: string) {
 	return array.filter(msg => msg.local && msg.sent == false);
 }
 
-
 function ackMessage(contactId: string, ack: TextMessageAck | FileAckMessage) {
 	let id = ack.id;
 	let array = messages.getArray<StoredAnyMessage>(contactId) ?? [];
@@ -66,5 +66,18 @@ function ackMessage(contactId: string, ack: TextMessageAck | FileAckMessage) {
 	messages.setArray(contactId, array);
 }
 
-export { appendMessage, findMessage, getPending, ackMessage };
+function confirmFileBlock(uid: string, { block, id }: { block: number, id: string }) {
+	let array = messages.getArray<StoredAnyMessage>(uid) ?? [];
+	const idx = array.findIndex((msg) => msg.id == id && (msg as StoredFileMessage)["isFile"] == true)
+	if (idx == -1) {
+		console.error("Did not find file to confirm block:", uid, id);
+		return;
+	}
+	//TODO: Check if is last block, and mark as finished
+	(array[idx] as StoredFileMessage).last_confirmed = block;
+	messages.setArray(uid, array);
+}
+
+export { appendMessage, findMessage, getPending, ackMessage, confirmFileBlock };
 export { useMessages };
+export type { Message, MessageWithId, StoredMessage, File, StoredFileMessage, StoredAnyMessage };
