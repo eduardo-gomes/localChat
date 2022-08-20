@@ -100,8 +100,11 @@ function onIncomingMessage({ origin, msg }: { origin: Connection, msg: TextMessa
 		console.log("Received file ACK part:", msg.block_offset);
 		confirmFileBlock(uid, { block: msg.block_offset, id: msg.id });
 		sendToConnection(origin);//will send pending messages(mostly files) if any
-	} else
+	} else {
 		ackMessage(uid, msg);
+		if (msg.type == MessageTypes.FILE_MESSAGE_ACK)
+			sendToConnection(origin);//will send pending messages(mostly files) if any
+	}
 }
 
 export { sendMessage, sendToConnection, onIncomingMessage };

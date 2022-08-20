@@ -2,7 +2,7 @@ import RNFS from "react-native-fs";
 import { File } from "./messageTransmitter";
 import { FileDataMessage } from "./netMessages";
 
-const BLOCK_LENGTH = 1536;//2048 in base64
+const BLOCK_LENGTH = 49152;//2**16 in base64
 
 function createFilePath(uid: string, id: string, name: string) {
 	const folder = `${RNFS.DocumentDirectoryPath}/${uid}/${id}`;
