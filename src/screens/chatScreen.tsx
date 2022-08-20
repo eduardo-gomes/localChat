@@ -1,9 +1,10 @@
 import React, { useEffect } from "react";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
-import { ScrollView, Text, TextInput, TextStyle, ToastAndroid, useColorScheme, View, ViewStyle } from "react-native";
+import { Pressable, ScrollView, Text, TextInput, TextStyle, ToastAndroid, useColorScheme, View, ViewStyle } from "react-native";
 import { getStyles } from "../styles";
 import DocumentPicker from "react-native-document-picker";
+import FileViewer from "react-native-file-viewer";
 
 import BotãoRedondo from "../botãoRedondo";
 import ContactManager from "../lib/contactManager";
@@ -67,21 +68,33 @@ function MessageView({ msg }: { msg: Message | File }) {
 		);
 	} else {
 		const msg = _msg as File;
-		function getFileProgress(){
-			const got = (msg as StoredFileMessage).last_confirmed+1;
+		const fileProgress = function getFileProgress() {
+			const got = (msg as StoredFileMessage).last_confirmed + 1;
 			const blocks = sizeInBlocks(msg.size);
-			if(blocks == got)
+			if (blocks == got)
 				return 100;
 			else
-				return Math.max(got / blocks, 0)*100;
+				return Math.max(got / blocks, 0) * 100;
+		}();
+		const fileTransferred: boolean = (fileProgress >= 100);
+		const status = (fileTransferred ? undefined : (msg.local && !msg.sent ? " | Não enviado" : " | Transferência incompleta :" + fileProgress.toFixed(1) + "%"));
+		function open() {
+			if (!msg.local && !fileTransferred) {
+				ToastAndroid.show("Arquivo incompleto!", ToastAndroid.SHORT);
+				return;
+			}
+			const path = msg.path.replace("file:", "");
+			FileViewer.open(path).then(() => console.log("open:", path)).catch((error) => {
+				console.error("Could not open file:", path, error);
+			});
 		}
-		const fileTransferred: boolean = (getFileProgress() == 100);
-		const status = (fileTransferred ? undefined : (msg.local && !msg.sent ? " | Não enviado" : " | Transferência incompleta :" + getFileProgress().toFixed(1) + "%"));
 		return (
-			<View style={style}>
-				<Text style={styles.messageText}>File: {msg.name}</Text>
-				<Text style={styles.messageStatus}>Size: {msg.size}{status}</Text>
-			</View>
+			<Pressable onPress={open}>
+				<View style={style}>
+					<Text style={styles.messageText}>File: {msg.name}</Text>
+					<Text style={styles.messageStatus}>Size: {msg.size}{status}</Text>
+				</View>
+			</Pressable>
 		);
 	}
 }
