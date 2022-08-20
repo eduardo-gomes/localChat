@@ -6,6 +6,7 @@ import TcpSocket from "react-native-tcp-socket";
 import { getId } from "./id";
 import { BannerMessage, NetMessage, MessageTypes, TextMessage, TextMessageAck, FileMessage, FileDataMessage, FileAckMessage } from "./netMessages";
 import ConnectionManager from "./connectionManager";
+import Zeroconf_App from "./zeroconf";
 
 async function generateBanner() {
 	let obj: BannerMessage = {
@@ -126,6 +127,7 @@ class Networking {
 	static counter: number = 0;
 	static instance: Networking = new Networking(5000);
 	isBound = false;
+	zeroconf: Zeroconf_App;
 
 	constructor(listeningPort: number, listeningAddress: string = "0.0.0.0") {
 		this.server = TcpSocket.createServer((socket) => { this.incomingConnection(socket); });
@@ -141,6 +143,7 @@ class Networking {
 				}, 1000);
 			}
 		});
+		this.zeroconf = new Zeroconf_App();
 		this.server.on("listening", () => { this.onListen(); });
 		this.listen();
 		Networking.counter++;
@@ -152,6 +155,10 @@ class Networking {
 	private onListen() {
 		this.isBound = true;
 		console.log("listen callback:", this.server.address());
+		const port = this.server.address()?.port;
+		if (port) {
+			this.zeroconf.publish(port);
+		}
 	}
 	private async incomingConnection(socket: TcpSocket.Socket) {
 		// socket.on("data", (data) => {
@@ -181,6 +188,7 @@ class Networking {
 	}
 	close() {
 		console.log("Closing server!");
+		this.zeroconf.stop();
 		this.server.close(console.error);
 	}
 	log() {
