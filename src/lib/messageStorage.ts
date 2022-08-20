@@ -1,6 +1,7 @@
 import { MMKVLoader, useMMKVStorage } from "react-native-mmkv-storage";
 
 import type { ContactInfo } from '../lib';
+import { sizeInBlocks } from "./fileStorage";
 import { FileAckMessage, TextMessageAck } from "./netMessages";
 
 const messages = new MMKVLoader().withInstanceID("messages").initialize();
@@ -24,7 +25,6 @@ type File = {
 	size: number,
 	isFile?: true,
 	sent?: boolean,
-	transferred?: boolean
 	local?: boolean,
 };
 interface StoredFileMessage extends File {
@@ -53,7 +53,17 @@ function findMessage(uid: string, id: string) {
 
 function getPending(contactId: string) {
 	let array = messages.getArray<StoredAnyMessage>(contactId) ?? [];
-	return array.filter(msg => msg.local && msg.sent == false);
+	function isPending(msg: StoredAnyMessage){
+		if(msg.local != true)
+			return false;
+		if((msg as StoredFileMessage).isFile == true){
+			let file = msg as StoredFileMessage;
+			return file.last_confirmed+1 < sizeInBlocks(file.size);
+		}else{
+			return !msg.sent;
+		}
+	}
+	return array.filter(isPending);
 }
 
 function ackMessage(contactId: string, ack: TextMessageAck | FileAckMessage) {
@@ -73,7 +83,6 @@ function confirmFileBlock(uid: string, { block, id }: { block: number, id: strin
 		console.error("Did not find file to confirm block:", uid, id);
 		return;
 	}
-	//TODO: Check if is last block, and mark as finished
 	(array[idx] as StoredFileMessage).last_confirmed = block;
 	messages.setArray(uid, array);
 }

@@ -76,7 +76,8 @@ class Connection {
 			msg.type == MessageTypes.TEXT_MESSAGE_ACK ||
 			msg.type == MessageTypes.FILE_MESSAGE ||
 			msg.type == MessageTypes.FILE_MESSAGE_ACK ||
-			msg.type == MessageTypes.FILE_MESSAGE_DATA) {
+			msg.type == MessageTypes.FILE_MESSAGE_DATA ||
+			msg.type == MessageTypes.FILE_DATA_ACK) {
 
 			this.emitter.emit(Connection.Events.MESSAGE, msg);
 		}

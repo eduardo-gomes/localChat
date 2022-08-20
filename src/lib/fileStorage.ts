@@ -11,12 +11,38 @@ function createFilePath(uid: string, id: string, name: string) {
 	return path;
 }
 
+function sizeInBlocks(number: number) {
+	let blocks = Math.ceil(number / BLOCK_LENGTH);
+	return blocks;
+}
+
 async function storeFileData(file: File, data: FileDataMessage) {
 	const path = file.path;
 	const offset = BLOCK_LENGTH * data.block_offset;
-	let res = await RNFS.write(path, data.data_base64, offset, "base64");
-	console.log("File write:", res);
+	let res;
+	try {
+		res = await RNFS.write(path, data.data_base64, offset, "base64");
+	} catch (e) {
+		console.error("Failed to write file:", e);
+		throw e;
+	}
+	// console.log("File write:", res);
 	return res;
 }
 
-export { createFilePath, storeFileData };
+async function getFileBlock(file: File, block: number): Promise<string> {
+	const path = file.path;
+	const offset = BLOCK_LENGTH * block;
+	const len = Math.min(BLOCK_LENGTH, file.size - offset);
+	// console.log("File read", offset, block, len, file.size - offset);
+	let res;
+	try {
+		res = await RNFS.read(path, len, offset, "base64");
+	} catch (e) {
+		console.error("Failed to read file:", e);
+		throw e;
+	}
+	return res;
+}
+
+export { createFilePath, storeFileData, sizeInBlocks, getFileBlock };

@@ -8,6 +8,8 @@ import DocumentPicker from "react-native-document-picker";
 import BotãoRedondo from "../botãoRedondo";
 import ContactManager from "../lib/contactManager";
 import type { Message, File } from "../lib/messageTransmitter";
+import { StoredFileMessage } from "../lib/messageStorage";
+import { sizeInBlocks } from "../lib/fileStorage";
 
 type Props = NativeStackScreenProps<RootStackParamList, "EditContact">;
 
@@ -65,11 +67,20 @@ function MessageView({ msg }: { msg: Message | File }) {
 		);
 	} else {
 		const msg = _msg as File;
-		const fileTransferred: boolean = !(msg.transferred ?? false);
+		function getFileProgress(){
+			const got = (msg as StoredFileMessage).last_confirmed+1;
+			const blocks = sizeInBlocks(msg.size);
+			if(blocks == got)
+				return 100;
+			else
+				return Math.max(got / blocks, 0)*100;
+		}
+		const fileTransferred: boolean = (getFileProgress() == 100);
+		const status = (fileTransferred ? undefined : (msg.local && !msg.sent ? " | Não enviado" : " | Transferência incompleta :" + getFileProgress().toFixed(1) + "%"));
 		return (
 			<View style={style}>
 				<Text style={styles.messageText}>File: {msg.name}</Text>
-				<Text style={styles.messageStatus}>Size: {msg.size}{fileTransferred ? " | Não transferido" : undefined}</Text>
+				<Text style={styles.messageStatus}>Size: {msg.size}{status}</Text>
 			</View>
 		);
 	}
