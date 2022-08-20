@@ -86,13 +86,26 @@ function MessageView({ msg }: { msg: Message | File }) {
 			const path = msg.path.replace("file:", "");
 			FileViewer.open(path).then(() => console.log("open:", path)).catch((error) => {
 				console.error("Could not open file:", path, error);
+				ToastAndroid.show(error.message, ToastAndroid.SHORT);
 			});
+		}
+		function sizeToHuman(number: number) {
+			const prefixNum = Math.floor(Math.log(number) / Math.log(1024));
+			const value = number / Math.pow(1024, prefixNum);
+			let str = "B";
+			if (prefixNum == 1)
+				str = " KiB";
+			else if (prefixNum == 2)
+				str = " MiB";
+			else if (prefixNum == 3)
+				str = " GiB";
+			return value.toFixed(2) + str;
 		}
 		return (
 			<Pressable onPress={open}>
 				<View style={style}>
 					<Text style={styles.messageText}>File: {msg.name}</Text>
-					<Text style={styles.messageStatus}>Size: {msg.size}{status}</Text>
+					<Text style={styles.messageStatus}>Size: {sizeToHuman(msg.size)}{status}</Text>
 				</View>
 			</Pressable>
 		);
