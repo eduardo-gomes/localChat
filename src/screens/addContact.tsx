@@ -78,7 +78,6 @@ function AddContact({ navigation, route }: Props) {
 			<TextInput style={styles.textFormInput} editable={receivedId === undefined} value={id} onChangeText={setId} placeholder="Insira o id, ou obtenha a partir do endereço"></TextInput>
 			<Button title='Salvar' onPress={() => { if (saveContactById(id, name)) clear(); }} />
 			{id.length ? undefined : <GetIdFromAddress onGetId={onSetId} />}
-			<Button title='Zeroconf' onPress={() => navigation.navigate('Zeroconf')} />
 		</View>
 	);
 }

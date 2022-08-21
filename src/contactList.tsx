@@ -47,7 +47,7 @@ function EmptyListPrompt({ navigation }: Navigation) {
 			<Text style={styles.emptyListPromptText}>Parece que você não possui nenhum contato.
 				{"\n"}
 				Você pode adicionar um pressionando o botão abaixo</Text>
-			<Button onPress={() => { navigation.navigate("AddContact") }} title="Adicionar contatos" />
+			<Button onPress={() => { navigation.navigate("Zeroconf") }} title="Adicionar contatos" />
 		</View>
 	)
 };
@@ -81,7 +81,7 @@ function ContactList({ navigation, route }: Props) {
 			bottom: 10,
 			right: 10
 		}}>
-			<PlusButton size={50} background={styles.mainColor.color} color={styles.secondaryColor.color} onPress={() => { navigation.navigate("AddContact"); }} />
+			<PlusButton size={50} background={styles.mainColor.color} color={styles.secondaryColor.color} onPress={() => { navigation.navigate("Zeroconf"); }} />
 		</View> : null}
 	</>
 	);
