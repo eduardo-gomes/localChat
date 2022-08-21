@@ -2,7 +2,6 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 import { Appearance, Button } from 'react-native';
-import AddContact from './addContact';
 
 import ContactList from './contactList';
 import { ContactInfo } from './lib';
@@ -11,6 +10,7 @@ import InfoScreen from './lib/infoScreen';
 import { getId } from './lib/id';
 
 import { networking } from './lib/socket';
+import AddContact from './screens/addContact';
 import EditContact from './screens/editContact';
 import ChatScreen from './screens/chatScreen';
 import ZeroconfScreen from './screens/zeroconfScreen';

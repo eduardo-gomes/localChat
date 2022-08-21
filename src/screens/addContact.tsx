@@ -1,11 +1,11 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React from 'react';
 import { Button, Text, TextInput, useColorScheme, View } from "react-native";
-import { RootStackParamList } from './App';
-import ContactManager from './lib/contactManager';
-import ID from './lib/id';
-import { networking } from './lib/socket';
-import { getStyles } from './styles';
+import { RootStackParamList } from '../App';
+import ContactManager from '../lib/contactManager';
+import ID from '../lib/id';
+import { networking } from '../lib/socket';
+import { getStyles } from '../styles';
 
 function GetIdFromAddress({ onGetId }: { onGetId: (id: string) => void }) {
 	const styles = getStyles(useColorScheme());
