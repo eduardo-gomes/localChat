@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Zeroconf from "react-native-zeroconf";
 import { getId } from "./id";
 
-type Discovered_Host = {id: string, address: string, port: number};
+type Discovered_Host = { id: string, address: string, port: number };
 
 class Zeroconf_App {
 	zeroconf: Zeroconf;
@@ -20,11 +20,11 @@ class Zeroconf_App {
 			console.log("[zeroconf]: announce:", id, "at", port);
 		});
 	}
-	addListener(service_listener: (discovered: Discovered_Host) => void){
-		this.zeroconf.on("resolved", (service) => {service_listener({id: service.name, address: service.addresses[0], port: service.port})});
+	addListener(service_listener: (discovered: Discovered_Host) => void) {
+		this.zeroconf.on("resolved", (service) => { service_listener({ id: service.name, address: service.addresses[0], port: service.port }) });
 	}
-	getAvailable(): Discovered_Host[]{
-		let available = Object.entries(this.zeroconf.getServices()).map<Discovered_Host>(([name, service]) => ({id: name, address: service.addresses[0], port: service.port}));
+	getAvailable(): Discovered_Host[] {
+		let available = Object.entries(this.zeroconf.getServices()).map<Discovered_Host>(([name, service]) => ({ id: name, address: service.addresses[0], port: service.port }));
 		return available;
 	}
 	useAvailable() {
@@ -47,3 +47,4 @@ class Zeroconf_App {
 }
 
 export default Zeroconf_App;
+export type { Discovered_Host };

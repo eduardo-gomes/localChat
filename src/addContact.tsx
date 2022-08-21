@@ -27,6 +27,7 @@ function GetIdFromAddress({ onGetId }: { onGetId: (id: string) => void }) {
 type Props = NativeStackScreenProps<RootStackParamList, "AddContact">;
 
 function AddContact({ navigation, route }: Props) {
+	const receivedId = route.params?.id;
 	const styles = getStyles(useColorScheme());
 	function saveContactById(id: string, name?: string) {
 		if (name?.length == 0)
@@ -49,6 +50,7 @@ function AddContact({ navigation, route }: Props) {
 
 	const [name, setName] = React.useState("");
 	const [id, setId] = React.useState("");
+	React.useEffect(() => { if (receivedId) setId(receivedId) }, [receivedId]);
 
 	const [localId, setLocalId] = React.useState<string | null>(null);
 
@@ -73,9 +75,10 @@ function AddContact({ navigation, route }: Props) {
 			<Text style={styles.labelForm}>Nome:</Text>
 			<TextInput style={styles.textFormInput} value={name} onChangeText={setName}></TextInput>
 			<Text style={styles.labelForm}>ID</Text>
-			<TextInput style={styles.textFormInput} value={id} onChangeText={setId} placeholder="Insira o id, ou obtenha a partir do endereço"></TextInput>
+			<TextInput style={styles.textFormInput} editable={receivedId === undefined} value={id} onChangeText={setId} placeholder="Insira o id, ou obtenha a partir do endereço"></TextInput>
 			<Button title='Salvar' onPress={() => { if (saveContactById(id, name)) clear(); }} />
 			{id.length ? undefined : <GetIdFromAddress onGetId={onSetId} />}
+			<Button title='Zeroconf' onPress={() => navigation.navigate('Zeroconf')} />
 		</View>
 	);
 }

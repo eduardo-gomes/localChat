@@ -13,13 +13,15 @@ import { getId } from './lib/id';
 import { networking } from './lib/socket';
 import EditContact from './screens/editContact';
 import ChatScreen from './screens/chatScreen';
+import ZeroconfScreen from './screens/zeroconfScreen';
 
 type RootStackParamList = {
 	Home: undefined;
-	AddContact: undefined;
+	AddContact: undefined | { id: string };
 	NetInfo: undefined;
 	EditContact: ContactInfo;
 	ChatScreen: ContactInfo;
+	Zeroconf: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -63,6 +65,10 @@ class App extends React.Component {
 					<Stack.Screen
 						name="ChatScreen"
 						component={ChatScreen}
+					/>
+					<Stack.Screen
+						name="Zeroconf"
+						component={ZeroconfScreen}
 					/>
 					{__DEV__ ? <Stack.Screen
 						name="NetInfo"
