@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Zeroconf, { Service } from "react-native-zeroconf";
 import { getContacts } from "./contactManager";
 import { getId } from "./id";
+import { networking } from "./socket";
 
 type Discovered_Host = { id: string, address: string, port: number, alt?: string[] };
 
@@ -15,20 +16,31 @@ function auto_connect(hosts: Discovered_Host[]) {
 	const know_available = hosts.filter((host) => know_hosts.hasOwnProperty(host.id));
 	console.log("[zeroconf] update: ", JSON.stringify(hosts));
 	console.log("[zeroconf] known: ", JSON.stringify(know_available));
+	know_available.forEach((host) =>
+		networking.connectAndGetId(host.address, host.port)
+			.then((id) => console.log("[zeroconf] connected to:", id))
+			.catch(() => console.log("[zeroconf] failed to", host)));
 }
 
 class Zeroconf_App {
 	zeroconf: Zeroconf;
+	is_waiting_timeout: boolean;
 	timeout?: NodeJS.Timeout;
 	constructor() {
+		this.is_waiting_timeout = false;
 		this.zeroconf = new Zeroconf();
 		this.zeroconf.scan("local-chat", "tcp", "local.");
 		this.zeroconf.on("update", () => {
 			let got = this.getAvailable();
-			if (this.timeout) {
-				clearTimeout(this.timeout);
+			if (!this.is_waiting_timeout) {
+				this.is_waiting_timeout = true;
+				auto_connect(got);
+				setTimeout(() => { this.is_waiting_timeout = false; }, 3000);
+			} else {
+				if (this.timeout)
+					clearTimeout(this.timeout);
+				this.timeout = setTimeout(auto_connect, 3000, this.getAvailable());
 			}
-			this.timeout = setTimeout(auto_connect, 3000, got);
 		})
 	}
 	publish(port: number) {
