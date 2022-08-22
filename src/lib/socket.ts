@@ -188,7 +188,7 @@ class Networking {
 	}
 	close() {
 		console.log("Closing server!");
-		this.zeroconf.stop();
+		this.zeroconf.stop_unpublish();
 		this.server.close(console.error);
 	}
 	log() {

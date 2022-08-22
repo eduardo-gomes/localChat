@@ -26,10 +26,12 @@ class Zeroconf_App {
 	zeroconf: Zeroconf;
 	is_waiting_timeout: boolean;
 	timeout?: NodeJS.Timeout;
+	scan_timeout?: NodeJS.Timeout;
+	regular_scan_timeout: NodeJS.Timeout[];
 	constructor() {
+		this.regular_scan_timeout = [];
 		this.is_waiting_timeout = false;
 		this.zeroconf = new Zeroconf();
-		this.zeroconf.scan("local-chat", "tcp", "local.");
 		this.zeroconf.on("update", () => {
 			let got = this.getAvailable();
 			if (!this.is_waiting_timeout) {
@@ -42,6 +44,41 @@ class Zeroconf_App {
 				this.timeout = setTimeout(auto_connect, 3000, this.getAvailable());
 			}
 		})
+		this.regular_scan();
+	}
+	private regular_scan() {
+		//Scan for 15s, wait for 105s
+		function interval(instance: Zeroconf_App) {
+			console.log("[zeroconf] regular scan interval");
+			instance.stop();
+			instance.regular_scan_timeout[0] = setTimeout(regular, 120 * 1000, instance);
+
+		}
+		function regular(instance: Zeroconf_App) {
+			console.log("[zeroconf] regular scan start");
+			instance.start();
+			instance.regular_scan_timeout[1] = setTimeout(interval, 15 * 1000, instance);
+		};
+		setTimeout(regular, 1500, this);
+	}
+	scan_until_timeout(milliseconds: number) {
+		//stop regular scan:
+		console.log("[zeroconf] stop regular scan");
+		this.regular_scan_timeout.forEach(clearTimeout);
+
+		if (this.scan_timeout)
+			clearTimeout(this.scan_timeout);
+		this.start();
+		//Instead of stopping search, restart regular scan
+		this.scan_timeout = setTimeout(() => this.regular_scan(), milliseconds);
+	}
+	start() {
+		console.log("[zeroconf] start search");
+		this.zeroconf.scan("local-chat", "tcp", "local.");
+	}
+	stop() {
+		this.zeroconf.stop();
+		console.log("[zeroconf] stop search");
 	}
 	publish(port: number) {
 		getId().then((id) => {
@@ -68,11 +105,11 @@ class Zeroconf_App {
 		})
 		return status;
 	}
-	stop() {
+	stop_unpublish() {
 		getId().then((id) => {
 			this.zeroconf.unpublishService(id)
-			this.zeroconf.stop();
 		});
+		this.regular_scan_timeout.forEach(clearTimeout);
 	}
 }
 
