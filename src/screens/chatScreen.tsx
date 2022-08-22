@@ -11,6 +11,7 @@ import ContactManager from "../lib/contactManager";
 import type { Message, File } from "../lib/messageTransmitter";
 import { StoredFileMessage } from "../lib/messageStorage";
 import { sizeInBlocks } from "../lib/fileStorage";
+import connectionManager from "../lib/connectionManager";
 
 type Props = NativeStackScreenProps<RootStackParamList, "EditContact">;
 
@@ -114,7 +115,9 @@ function MessageView({ msg }: { msg: Message | File }) {
 
 export default function ChatScreen({ navigation, route }: Props) {
 	const contact = route.params;
+	const online = connectionManager.useOnline(contact.uid);
 	useEffect(() => { navigation.setOptions({ title: `Chat ${contact.name}` }); }, [contact.name]);
+	useEffect(() => { navigation.setOptions({ headerRight: () => <Text>{online ? "Online" : "Offline"}</Text> }); }, [online]);
 
 	function send(message: string) {
 		ContactManager.sendMessage(contact, { content: message });
