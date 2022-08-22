@@ -14,6 +14,7 @@ import { RootStackParamList } from './App';
 import PlusButton from './botãoRedondo';
 
 import { ContactInfo } from './lib';
+import connectionManager from './lib/connectionManager';
 import ContactManager from './lib/contactManager';
 import { InfoButton } from './lib/infoScreen';
 import { getStyles } from './styles';
@@ -27,11 +28,13 @@ function ContactEntry({ contact, navigation }: { contact: ContactInfo } & Naviga
 	function short() {
 		navigation.navigate("ChatScreen", contact);
 	}
+	const online = connectionManager.useOnline(contact.uid);
 	return (
 		<Pressable style={styles.contactInfoList}
 			onLongPress={long} onPress={short}
 		>
 			<Text style={styles.sectionTitle}>{contact.name}</Text>
+			<Text>{online ? "Online" : "Offline"}</Text>
 			<Text style={styles.sectionDescription}>ID: {contact.uid}</Text>
 		</Pressable>
 	);
